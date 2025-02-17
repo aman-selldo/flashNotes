@@ -1,0 +1,21 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  username: aman
+  password: aman
+  pool: 5
+
+development:
+  <<: *default
+  database: flashnotes
+
+test:
+  <<: *default
+  database: flashnotes
+
+production:
+  <<: *default
+  database: flashnotes
+  username: aman
+  password: aman
