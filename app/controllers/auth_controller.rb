@@ -3,7 +3,7 @@ class AuthController < ApplicationController
   layout "auth"
 
     before_action :authenticate_request, only: [:logout ]
-    # before_action :look_cookies, except: [:logout]
+    before_action :check_for_cookies, except: [:logout]
     skip_before_action :verify_authenticity_token, only: [:create, :login, :logout]
 
     SECRET_KEY = Rails.application.secret_key_base
@@ -16,7 +16,7 @@ class AuthController < ApplicationController
 
     def new_login
       @user = User.new
-      render :login 
+      render :login
     end
 
     def create
@@ -66,7 +66,4 @@ class AuthController < ApplicationController
     def generate_jwt(user)
         JWT.encode({user_id: user.id, role: user.role, exp: 24.hours.from_now.to_i}, SECRET_KEY, 'HS256')
     end
-
-   
-
 end

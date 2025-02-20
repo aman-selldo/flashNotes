@@ -13,10 +13,10 @@ class ApplicationController < ActionController::Base
         decoded = JWT.decode(cookie, SECRET_KEY, true, algorithm: 'HS256')[0]
         @current_user = User.find(decoded["user_id"])
       rescue JWT::DecodeError
-        render json: {error: "Invalid token"}, status: :unauthorized
+        @current_user = nil
       end
     else
-      redirect_to login_path
+      @current_user = nil
     end
   end
 
@@ -25,11 +25,11 @@ class ApplicationController < ActionController::Base
     @current_user ||= authenticate_request
   end
 
-  # def look_cookies
-  #   redirect_to root_path if current_user.present? 
-  #   return nil
-  # end
-
+  def check_for_cookies
+    if current_user.present?
+      redirect_to root_path
+    end
+  end
 
   helper_method :current_user
 end
