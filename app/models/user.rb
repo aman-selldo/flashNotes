@@ -7,6 +7,13 @@ class User < ApplicationRecord
     has_many :questions, through: :paragraphs
 
     validates :username, presence: true, uniqueness: true
-    validates :email, presence: true, uniqueness: true
-    validates :password, presence: true
+    validates :email, presence: true, uniqueness: true , format: { with: URI::MailTo::EMAIL_REGEXP, message: "Please Enter Valid Email Address" }
+    validates :password, presence: true, length: {minimum: 5}
+
+
+    private
+
+    def passwords_mismatch
+        errors.add(:passwords_confirmation, "passwords do not match!!") if password != password_confirmation
+    end
 end
