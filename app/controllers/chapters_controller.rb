@@ -1,10 +1,13 @@
 class ChaptersController < ApplicationController
 
+	before_action :set_subject
+
 	def index
 		@chapters = @subject.chapters
 	end
 	
 	def show
+		@chapter = @subject.chapters.find(params[:id])
 	end
 
 	def new
@@ -12,7 +15,7 @@ class ChaptersController < ApplicationController
 	end
 
 	def create
-		@chapter = @subject.chapters.new()
+		@chapter = @subject.chapters.new(chapter_params)
 		if @chapter.save
 			redirect_to subject_chapters_path(@subject), notice: "Chapter created successfully!!"
 		else

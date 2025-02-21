@@ -1,0 +1,9 @@
+<h1>create a new chapter </h1>
+
+<%= form_with model: [@subject, @chapter] do |f| %>
+  <div class="mb-3">
+    <%= f.label :name, "chapter name"%>
+    <%= f.text_field :name, class: "form-control"%>
+  </div>
+  <%= f.submit "create chapter", class: "btn btn-primary"%>
+<% end %>

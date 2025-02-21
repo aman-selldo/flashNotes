@@ -20,7 +20,9 @@ Rails.application.routes.draw do
   delete "/logout", to: "auth#logout"
 
 
-  resources :subjects
+  resources :subjects do
+    resources :chapters, only: [:index, :new, :show, :create, :edit, :update, :destroy]
+  end
 
 
   match "*path", to: "not_found#show", via: :all
