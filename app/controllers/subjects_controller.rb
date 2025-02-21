@@ -1,19 +1,15 @@
 class SubjectsController < ApplicationController
   
-  before_action :set_subject, only: [:show, :edit, :update, :destroy]
+  before_action :set_subject, only: [:show, :edit, :update, :destroy, :index, :new]
 
   def index
-    if current_user.present?
-      @subjects = current_user.subjects
-    else
-      redirect_to login_path
-    end
+    @subjects = current_user.subjects
   end
 
   def show
   end
 
-  def new 
+  def new
     @subject = Subject.new
   end
 
@@ -46,17 +42,20 @@ class SubjectsController < ApplicationController
   private
 
   def subject_params
-    params.require(:subject).permit(:name, :description)
+    params.require(:subject).permit(:name)
   end
 
   def set_subject
-    @subject = current_user.subjects.find_by(id: params[:id])
-    redirect_to subjects_path, alert: "Subject not found!" unless @subject
+    if current_user.present?
+      @subject = current_user.subjects.find_by(id: params[:id])
+    else
+      redirect_to login_path, notice: "Something went wrong"
+    end
   end
 
   def authenticate_user
     unless current_user
-      redirect_to login_path, alert: "You need to login first"
+      redirect_to login_path, notice: "You need to login first"
     end
   end
 
