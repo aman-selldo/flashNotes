@@ -1,0 +1,13 @@
+<div class="container">
+  <h2>Create a new Subject </h2>
+
+  <%= form_with model: @subject, local: true do |f| %>
+    <div class="mb-3">
+      <%= f.label :name, "Subject Name", class: "form-label" %>
+      <%= f.text_field :name, class: "form-control", required: true %>
+    </div>
+
+    <%= f.submit "Create Subject", class: "btn btn-success"%>
+    <%= link_to "Back", subjects_path, class: "btn btn-secondary" %>
+  <% end %>
+</div>

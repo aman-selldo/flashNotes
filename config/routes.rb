@@ -19,7 +19,10 @@ Rails.application.routes.draw do
   get "/signup", to: "auth#new_signup"
   delete "/logout", to: "auth#logout"
 
-  
 
   resources :subjects
+
+
+  match "*path", to: "not_found#show", via: :all
+
 end

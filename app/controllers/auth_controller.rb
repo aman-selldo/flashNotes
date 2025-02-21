@@ -30,8 +30,8 @@ class AuthController < ApplicationController
       }
         redirect_to subjects_path, notice: "Signup successfully."
       else
-        puts @user.errors.full_messages
-        redirect_to :signup, notice: @user.errors.full_messages
+        error_message = @user.errors.full_messages.join('<br>')
+        redirect_to signup_path, notice: error_message
       end
     end
 

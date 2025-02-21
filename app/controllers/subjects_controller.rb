@@ -1,7 +1,13 @@
 class SubjectsController < ApplicationController
   
-  def index 
-    @subjects = current_user.subjects
+  before_action :set_subject, only: [:show, :edit, :update, :destroy]
+
+  def index
+    if current_user.present?
+      @subjects = current_user.subjects
+    else
+      redirect_to login_path
+    end
   end
 
   def show
@@ -13,25 +19,26 @@ class SubjectsController < ApplicationController
 
   def create
     @subject = current_user.subjects.build(subject_params)
-    if subject.save
-      redirect_to @subject, notice: "Subject was created successfully"
+    if @subject.save
+      redirect_to subjects_path, notice: "Subject was created successfully"
     else
       render :new
     end
   end
 
   def edit
+    
   end
 
   def update
     if @subject.update(subject_params)
-      redirect_to @subject, notice: "Subject updated successfully!!"
+      redirect_to subjects_path, notice: "Subject updated successfully!!"
     else
-      render :edit 
+      render :edit
     end
   end
 
-  def destroy
+  def destroy    
     @subject.destroy
     redirect_to subjects_path, notice: "Subject deleted Successfully"
   end
