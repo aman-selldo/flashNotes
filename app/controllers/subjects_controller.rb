@@ -39,7 +39,7 @@ class SubjectsController < ApplicationController
   def destroy    
     @subject.destroy
     redirect_to subjects_path, notice: "Subject deleted Successfully"
-  end
+  end 
 
   private
 

@@ -21,7 +21,7 @@ Rails.application.routes.draw do
 
 
   resources :subjects do
-    resources :chapters, only: [:index, :new, :show, :create, :edit, :update, :destroy]
+    resources :chapters
   end
 
 

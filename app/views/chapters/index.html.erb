@@ -7,8 +7,8 @@
   <% @chapters.each do |chapter| %>
     <li>
       <%= link_to chapter.name, subject_chapter_path(@subject, chapter) %>
-      <%= link_to "Edit", edit_subject_chapter_path(@subject, chapter), class: "btn btn-warning"%>
-      <%= link_to "Delete", subject_chapter_path(@subject, chapter), method: :delete, class: "btn btn-danger" %>
+      <%= button_to "Edit", edit_subject_chapter_path(@subject, chapter), class: "btn btn-warning"%>
+      <%= button_to "Delete", subject_chapter_path(@subject, chapter), method: :delete, class: "btn btn-danger" %>
     </li>
   <% end %>
 </ul>

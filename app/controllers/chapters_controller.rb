@@ -1,16 +1,21 @@
 class ChaptersController < ApplicationController
 
-	before_action :set_subject
+	before_action :set_subject, only: [:index, :show, :update, :destroy, :create, :new]
+
+	before_action :set_chapter, only: [:index, :show, :update, :destroy, :create]
+
 
 	def index
 		@chapters = @subject.chapters
 	end
 	
 	def show
+		@subject = Subject.find(params[:subject_id])
 		@chapter = @subject.chapters.find(params[:id])
 	end
 
 	def new
+		@subject = Subject.find(params[:subject_id])
 		@chapter = @subject.chapters.new
 	end
 
@@ -34,7 +39,7 @@ class ChaptersController < ApplicationController
 		end
 	end
 
-	def destroy
+	def destroy		
 		@chapter.destroy
 		redirect_to subject_chapters_path(@subject), notice: "Chapter deleted successfully!!"
 	end
@@ -42,11 +47,12 @@ class ChaptersController < ApplicationController
 	private
 
 	def set_subject
-		@subject = Subject.find(params[:subject_id])
+		@subject = Subject.find_by(id: params[:subject_id])
+		redirect_to subject_path, notice: "Subject not found!!" if @subject.nil?
 	end
 
 	def set_chapter
-		@chapter = @subject.chapter.find(params[:id])
+		@chapter = @subject.chapters.find_by(id: params[:id])
 	end
 
 	def chapter_params
