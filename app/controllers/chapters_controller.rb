@@ -47,12 +47,19 @@ class ChaptersController < ApplicationController
 	private
 
 	def set_subject
-		@subject = Subject.find_by(id: params[:subject_id])
-		redirect_to subject_path, notice: "Subject not found!!" if @subject.nil?
+		if current_user.present?
+			@subject = Subject.find_by(id: params[:subject_id])
+		else
+			redirect_to login_path, notice: "Something went wrong!!"
+		end
 	end
 
 	def set_chapter
-		@chapter = @subject.chapters.find_by(id: params[:id])
+		if current_user.present?
+			@chapter = @subject.chapters.find_by(id: params[:id])
+		else
+			redirect_to login_path, notice: "Something went wrong!!"
+		end
 	end
 
 	def chapter_params
