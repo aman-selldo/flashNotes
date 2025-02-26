@@ -6,7 +6,7 @@ class ChaptersController < ApplicationController
 
 
 	def index
-		@chapters = @subject.chapters
+		@chapters = @subject.chapters.order(created_at: :desc)
 	end
 	
 	def show
@@ -18,6 +18,7 @@ class ChaptersController < ApplicationController
 	def new
 		@subject = Subject.find(params[:subject_id])
 		@chapter = @subject.chapters.new
+		redirect_to subject_chapters_path
 	end
 
 	def create
@@ -32,6 +33,7 @@ class ChaptersController < ApplicationController
 	def edit
 		@subject = Subject.find(params[:subject_id])
 		@chapter = @subject.chapters.find(params[:id])
+		redirect_to subject_chapters_path
 	end
 
 	def update

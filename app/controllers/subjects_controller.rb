@@ -1,27 +1,25 @@
 class SubjectsController < ApplicationController
-  
-  before_action :set_subject, only: [:show, :edit, :update, :destroy, :index]
+  before_action :set_subject, only: [:show, :edit, :update, :destroy]
 
   def index
-
     redirect_to subjects_path if request.fullpath == "/"
-    
-    @subjects = current_user.subjects
+
+    @subjects = current_user.subjects.order(created_at: :desc)
+    @subject = Subject.new
   end
 
   def show
     begin
-    @subject = Subject.find(params[:id])    
-    @chapters = @subject.chapters
-    redirect_to subject_chapters_path(@subject.id)
-
-    rescue ActiveRecord::RecordNotFound 
+      @chapters = @subject.chapters
+      redirect_to subject_chapters_path(@subject.id)
+    rescue ActiveRecord::RecordNotFound
       redirect_to subjects_path, notice: "Subject not found"
     end
   end
 
   def new
     @subject = Subject.new
+    redirect_to subjects_path
   end
 
   def create
@@ -34,7 +32,6 @@ class SubjectsController < ApplicationController
   end
 
   def edit
-    
   end
 
   def update
@@ -45,10 +42,14 @@ class SubjectsController < ApplicationController
     end
   end
 
-  def destroy    
-    @subject.destroy
-    redirect_to subjects_path, notice: "Subject deleted Successfully"
-  end 
+  def destroy
+    if @subject
+      @subject.destroy
+      redirect_to subjects_path, notice: "Subject deleted Successfully"
+    else
+      redirect_to subjects_path, alert: "Subject not found or you don't have permission"
+    end
+  end
 
   private
 
@@ -59,9 +60,12 @@ class SubjectsController < ApplicationController
   def set_subject
     if current_user.present?
       @subject = current_user.subjects.find_by(id: params[:id])
+      unless @subject
+        redirect_to subjects_path, alert: "Subject not found or you don't have permission"
+      end
     else
       redirect_to login_path, notice: "Something went wrong!!"
-    end  
+    end
   end
 
   def authenticate_user
@@ -69,5 +73,4 @@ class SubjectsController < ApplicationController
       redirect_to login_path, notice: "You need to login first"
     end
   end
-
 end

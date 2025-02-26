@@ -1,20 +1,82 @@
-<h1>Chapters in <%= @subject.name%></h1>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Chapters in <%= @subject.name %></h1>
+    <button type="button" class="btn btn-primary new-subject-btn" data-bs-toggle="modal" data-bs-target="#newChapterModal">
+      New Chapter
+    </button>
+  </div>
 
-<%= link_to "New chapter", new_subject_chapter_path(@subject), class: "btn btn-primary"%>
+  <% if @chapters.any? %>
+    <div class="row">
+      <% @chapters.each do |chapter| %>
+        <% random_light_color = "hsl(#{rand(360)}, #{rand(30..70)}%, #{rand(80..95)}%)" %>
+        <div class="col-md-3 mb-4">
+          <div class="card clickable-card" style="background-color: <%= random_light_color %>;">
+            <div class="card-body text-center" onclick="window.location.href='<%= subject_chapter_paragraphs_path(@subject, chapter) %>'">
+              <h5 class="card-title mb-0">
+                <span class="subject-title"><%= chapter.name %></span>
+              </h5>
+            </div>
+            <div class="mt-2 d-flex justify-content-center gap-4 mb-3">
+              <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editChapterModal<%= chapter.id %>">
+                Edit
+              </button>
+              <%= button_to "Delete", subject_chapter_path(@subject, chapter), method: :delete, class: "btn btn-sm btn-danger", data: { confirm: 'Are you sure?' } %>
+            </div>
+          </div>
+        </div>
 
-<% if @chapters.any? %>
-<ul>
-  <% @chapters.each do |chapter| %>
-    <li>
-      <%= link_to chapter.name, subject_chapter_paragraphs_path(@subject, chapter) %>
-      <%= link_to "Edit", edit_subject_chapter_path(@subject, chapter), class: "btn btn-warning"%>
-      <%= button_to "Delete", subject_chapter_path(@subject, chapter), method: :delete, class: "btn btn-danger" %>
-      
-    </li>
+        <div class="modal fade" id="editChapterModal<%= chapter.id %>" tabindex="-1" aria-labelledby="editChapterModalLabel<%= chapter.id %>" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="editChapterModalLabel<%= chapter.id %>">Edit Chapter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <%= form_with model: chapter, url: subject_chapter_path(@subject, chapter), method: :patch, local: true, data: { turbo: false } do |f| %>
+                  <div class="mb-3">
+                    <%= f.label :name, "Chapter Name", class: "form-label" %>
+                    <%= f.text_field :name, class: "form-control", required: true %>
+                  </div>
+                  <div class="modal-footer">
+                    <%= f.submit "Update Chapter", class: "btn btn-success" %>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-muted">No chapters found.</p>
   <% end %>
-</ul>
-<% else %>
-  <p>no chapters found </p>
-<% end %>
 
-<%= link_to "Back to Subjects", subjects_path, class: "btn btn-secondary mt-3"%>
+  <%= link_to "Back to Subjects", subjects_path, class: "btn btn-secondary mt-3" %>
+
+  <div class="modal fade" id="newChapterModal" tabindex="-1" aria-labelledby="newChapterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newChapterModalLabel">Create a new Chapter</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_with model: Chapter.new, url: subject_chapters_path(@subject), local: true, data: { turbo: false } do |f| %>
+            <div class="mb-3">
+              <%= f.label :name, "Chapter Name", class: "form-label" %>
+              <%= f.text_field :name, class: "form-control", required: true %>
+            </div>
+
+            <div class="modal-footer">
+              <%= f.submit "Create Chapter", class: "btn btn-success" %>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,33 +1,49 @@
-<div class="container">
+<div class="container mt-4">
   <h2 class="mb-4"><%= @paragraph.title %></h2>
 
-  <div class="card mb-4 p-3 shadow-sm">
-    <h5>Paragraph Content</h5>
-    <p><%= @paragraph.content %></p>
+  <% random_paragraph_color = "hsl(#{rand(360)}, #{rand(30..70)}%, #{rand(80..95)}%)" %>
+  <div class="card mb-4 p-3 shadow-sm" style="background-color: <%= random_paragraph_color %>;">
+    <div class="card-body">
+      <h5 class="card-title">Paragraph Content</h5>
+      <p class="card-text"><%= @paragraph.content %></p>
+    </div>
   </div>
 
   <h3>Generated Flashcards</h3>
   <% if @paragraph.questions.any? %>
-    <div class="d-flex flex-wrap gap-3">
+    <div class="row">
       <% @paragraph.questions.each do |question| %>
-        <div class="card p-3 shadow-sm" style="width: 18rem;">
-          <div class="card-body">
-            <h5 class="card-title">Q: <%= question.question %></h5>
+        <% random_light_color = "hsl(#{rand(360)}, #{rand(30..70)}%, #{rand(80..95)}%)" %>
+        <div class="col-md-4 mb-4">
+          <div class="card p-3 shadow-sm question-card" data-bs-toggle="modal" data-bs-target="#answerModal<%= question.id %>" style="background-color: <%= random_light_color %>;">
+            <div class="card-body">
+              <h5 class="card-title">Q: <%= question.question %></h5>
+            </div>
+          </div>
+        </div>
 
-            <% if question.answers.any? %>
-              <ul class="card-text answer" style="display: none;">
-                <% question.answers.each do |answer| %>
-                  <li>
-                    <strong>Answer:</strong> <%= answer.answer %> 
-                    <%= link_to "Edit", edit_subject_chapter_paragraph_question_answer_path(@paragraph.chapter.subject, @paragraph.chapter, @paragraph, question, answer), class: "btn btn-sm btn-warning" %> 
-                    <%= link_to "Delete", subject_chapter_paragraph_question_answer_path(@paragraph.chapter.subject, @paragraph.chapter, @paragraph, question, answer), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-sm btn-danger" %>
-                  </li>
+        <div class="modal fade" id="answerModal<%= question.id %>" tabindex="-1" aria-labelledby="answerModalLabel<%= question.id %>" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content" style="background-color: <%= random_light_color %>;">
+              <div class="modal-header">
+                <h5 class="modal-title" id="answerModalLabel<%= question.id %>">Flashcard</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p><strong>Question:</strong> <%= question.question %></p>
+                <% if question.answers.any? %>
+                  <ul>
+                    <% question.answers.each do |answer| %>
+                      <li>
+                        <strong>Answer:</strong> <%= answer.answer %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% else %>
+                  <p class="text-muted">No answers available</p>
                 <% end %>
-              </ul>
-              <button class="btn btn-info btn-sm toggle-answer">Show Answers</button>
-            <% else %>
-              <p class="text-muted">No answers available</p>
-            <% end %>
+              </div>
+            </div>
           </div>
         </div>
       <% end %>
@@ -38,23 +54,5 @@
 
   <div class="mt-4">
     <%= link_to "Back to Paragraphs", subject_chapter_paragraphs_path(@chapter.subject, @chapter), class: "btn btn-secondary" %>
-    <%= link_to "Add Question", new_subject_chapter_paragraph_question_path(@paragraph.chapter.subject, @paragraph.chapter, @paragraph), class: "btn btn-primary" %>
   </div>
 </div>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".toggle-answer").forEach(button => {
-      button.addEventListener("click", function () {
-        let answerList = this.previousElementSibling;
-        if (answerList.style.display === "none") {
-          answerList.style.display = "block";
-          this.textContent = "Hide Answers";
-        } else {
-          answerList.style.display = "none";
-          this.textContent = "Show Answers";
-        }
-      });
-    });
-  });
-</script>

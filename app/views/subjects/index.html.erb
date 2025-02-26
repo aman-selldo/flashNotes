@@ -1,17 +1,80 @@
-<h1>Your subject </h1>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Your Subjects</h1>
+    <button type="button" class="btn btn-primary new-subject-btn" data-bs-toggle="modal" data-bs-target="#newSubjectModal">
+      New Subject
+    </button>
+  </div>
 
-<%= link_to "New Subject", new_subject_path, class: "btn btn-primary"%>
+  <% if @subjects.any? %>
+    <div class="row">
+      <% @subjects.each do |subject| %>
+        <% random_light_color = "hsl(#{rand(360)}, #{rand(30..70)}%, #{rand(80..95)}%)" %>
+        <div class="col-md-3 mb-4">
+          <div class="card clickable-card" style="background-color: <%= random_light_color %>;">
+            <div class="card-body text-center" onclick="window.location.href='<%= subject_chapters_path(subject) %>'">
+              <h5 class="card-title mb-0">
+                <span class="subject-title"><%= subject.name %></span>
+              </h5>
+            </div>
+            <div class="mt-2 d-flex justify-content-center gap-4 mb-3">
+              <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editSubjectModal<%= subject.id %>">
+                Edit
+              </button>
+              <%= button_to "Delete", subject, method: :delete, class: "btn btn-sm btn-danger", data: { confirm: 'Are you sure?' } %>
+            </div>
+          </div>
+        </div>
 
-<% if @subjects.any? %>
-  <ul>
-    <% @subjects.each do |subject| %>
-      <li>
-        <%= link_to subject.name, subject_chapters_path(subject)%>
-        <%= link_to "Edit", edit_subject_path(subject), class: "btn btn-warning"%>
-        <%= button_to "Delete", subject, method: :delete, class: "btn btn-danger" %>
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p> no subjects found <p>
-<% end %>
+        <div class="modal fade" id="editSubjectModal<%= subject.id %>" tabindex="-1" aria-labelledby="editSubjectModalLabel<%= subject.id %>" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="editSubjectModalLabel<%= subject.id %>">Edit Subject</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <%= form_with model: subject, url: subject_path(subject), method: :patch, local: true, data: { turbo: false } do |f| %>
+                  <div class="mb-3">
+                    <%= f.label :name, "Subject Name", class: "form-label" %>
+                    <%= f.text_field :name, class: "form-control", required: true %>
+                  </div>
+                  <div class="modal-footer">
+                    <%= f.submit "Update Subject", class: "btn btn-success" %>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>  
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-muted">No subjects found.</p>
+  <% end %>
+
+  <div class="modal fade" id="newSubjectModal" tabindex="-1" aria-labelledby="newSubjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newSubjectModalLabel">Create a new Subject</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_with model: @subject, local: true, data: { turbo: false } do |f| %>
+            <div class="mb-3">
+              <%= f.label :name, "Subject Name", class: "form-label" %>
+              <%= f.text_field :name, class: "form-control", required: true %>
+            </div>
+
+            <div class="modal-footer">
+              <%= f.submit "Create Subject", class: "btn btn-success" %>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
