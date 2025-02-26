@@ -1,14 +1,23 @@
 class SubjectsController < ApplicationController
   
-  before_action :set_subject, only: [:show, :edit, :update, :destroy, :index, :new]
+  before_action :set_subject, only: [:show, :edit, :update, :destroy, :index]
 
   def index
+
+    redirect_to subjects_path if request.fullpath == "/"
+    
     @subjects = current_user.subjects
   end
 
   def show
+    begin
     @subject = Subject.find(params[:id])    
     @chapters = @subject.chapters
+    redirect_to subject_chapters_path(@subject.id)
+
+    rescue ActiveRecord::RecordNotFound 
+      redirect_to subjects_path, notice: "Subject not found"
+    end
   end
 
   def new
@@ -51,8 +60,8 @@ class SubjectsController < ApplicationController
     if current_user.present?
       @subject = current_user.subjects.find_by(id: params[:id])
     else
-      redirect_to login_path, notice: "Something went wrong"
-    end
+      redirect_to login_path, notice: "Something went wrong!!"
+    end  
   end
 
   def authenticate_user

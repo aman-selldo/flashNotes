@@ -21,7 +21,13 @@ Rails.application.routes.draw do
 
 
   resources :subjects do
-    resources :chapters
+    resources :chapters do 
+      resources :paragraphs do
+        resources :questions do
+          resources :answers, only: [:create, :update, :destroy, :edit]
+        end
+      end
+    end
   end
 
 

@@ -1,8 +1,8 @@
 class ChaptersController < ApplicationController
 
-	before_action :set_subject, only: [:index, :show, :update, :destroy, :create, :new]
+	before_action :set_subject
 
-	before_action :set_chapter, only: [:index, :show, :update, :destroy, :create]
+	before_action :set_chapter, only: [:show, :update, :destroy, :edit]
 
 
 	def index
@@ -12,6 +12,7 @@ class ChaptersController < ApplicationController
 	def show
 		@subject = Subject.find(params[:subject_id])
 		@chapter = @subject.chapters.find(params[:id])
+		redirect_to subject_chapter_paragraphs_path(@subject.id, @chapter.id)
 	end
 
 	def new
@@ -29,10 +30,12 @@ class ChaptersController < ApplicationController
 	end
 
 	def edit
+		@subject = Subject.find(params[:subject_id])
+		@chapter = @subject.chapters.find(params[:id])
 	end
 
 	def update
-		if @chapter.update(chapter_parameter)
+		if @chapter.update(chapter_params)
 			redirect_to subject_chapters_path(@subject), notice: "Chapter updated successfully!!"
 		else
 			render :edit
@@ -47,18 +50,24 @@ class ChaptersController < ApplicationController
 	private
 
 	def set_subject
-		if current_user.present?
-			@subject = Subject.find_by(id: params[:subject_id])
-		else
-			redirect_to login_path, notice: "Something went wrong!!"
+		@subject = Subject.find_by(id: params[:subject_id])
+
+		unless @subject
+			redirect_to subjects_path, notice: "Subject not found!!"
 		end
 	end
 
 	def set_chapter
-		if current_user.present?
-			@chapter = @subject.chapters.find_by(id: params[:id])
-		else
-			redirect_to login_path, notice: "Something went wrong!!"
+		return unless params[:id]
+
+		unless @subject
+			redirect_to subjects_path, notice: "Subject not found!!" and return
+		end
+
+		@chapter = @subject.chapters.find_by(id: params[:id])
+
+		unless @chapter
+			redirect_to subject_chapters_path(@subject), notice: "Chapter not found!!" and return
 		end
 	end
 

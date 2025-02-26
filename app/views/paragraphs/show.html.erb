@@ -1,0 +1,60 @@
+<div class="container">
+  <h2 class="mb-4"><%= @paragraph.title %></h2>
+
+  <div class="card mb-4 p-3 shadow-sm">
+    <h5>Paragraph Content</h5>
+    <p><%= @paragraph.content %></p>
+  </div>
+
+  <h3>Generated Flashcards</h3>
+  <% if @paragraph.questions.any? %>
+    <div class="d-flex flex-wrap gap-3">
+      <% @paragraph.questions.each do |question| %>
+        <div class="card p-3 shadow-sm" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">Q: <%= question.question %></h5>
+
+            <% if question.answers.any? %>
+              <ul class="card-text answer" style="display: none;">
+                <% question.answers.each do |answer| %>
+                  <li>
+                    <strong>Answer:</strong> <%= answer.answer %> 
+                    <%= link_to "Edit", edit_subject_chapter_paragraph_question_answer_path(@paragraph.chapter.subject, @paragraph.chapter, @paragraph, question, answer), class: "btn btn-sm btn-warning" %> 
+                    <%= link_to "Delete", subject_chapter_paragraph_question_answer_path(@paragraph.chapter.subject, @paragraph.chapter, @paragraph, question, answer), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-sm btn-danger" %>
+                  </li>
+                <% end %>
+              </ul>
+              <button class="btn btn-info btn-sm toggle-answer">Show Answers</button>
+            <% else %>
+              <p class="text-muted">No answers available</p>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p>No flashcards generated yet.</p>
+  <% end %>
+
+  <div class="mt-4">
+    <%= link_to "Back to Paragraphs", subject_chapter_paragraphs_path(@chapter.subject, @chapter), class: "btn btn-secondary" %>
+    <%= link_to "Add Question", new_subject_chapter_paragraph_question_path(@paragraph.chapter.subject, @paragraph.chapter, @paragraph), class: "btn btn-primary" %>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toggle-answer").forEach(button => {
+      button.addEventListener("click", function () {
+        let answerList = this.previousElementSibling;
+        if (answerList.style.display === "none") {
+          answerList.style.display = "block";
+          this.textContent = "Hide Answers";
+        } else {
+          answerList.style.display = "none";
+          this.textContent = "Show Answers";
+        }
+      });
+    });
+  });
+</script>
