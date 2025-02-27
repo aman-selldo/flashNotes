@@ -4,11 +4,16 @@ class ParagraphsController < ApplicationController
 
   def index
     @paragraphs = @chapter.paragraphs
+    @chapter = Chapter.find(params[:chapter_id])
+    @subject = @chapter.subject
+    if params[:search].present?
+      @paragraphs = @paragraphs.where("title ILIKE ?", "%#{params[:search]}%")
+    end
   end
 
   def show
     @subject = @chapter.subject
-    @questions = @paragraph.questions.includes(:answers) # Preload answers to avoid N+1 queries
+    @questions = @paragraph.questions.includes(:answers)
   end
   
 

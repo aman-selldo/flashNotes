@@ -1,27 +1,43 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Your Subjects</h1>
+
+  <div class="d-flex">
+  <%= form_with url: subjects_path, method: :get, local: true, class: "me-2 d-flex", id: "search-form" do |f| %>
+    <%= f.text_field :search, value: params[:search], placeholder: "Search subjects...", 
+    class: "form-control me-2", id: "search-input" %>
+    <%= f.submit "Search", class: "btn btn-outline-primary", id: "search-button" %>
+  <% end %>
+</div>
+
+
     <button type="button" class="btn btn-primary new-subject-btn" data-bs-toggle="modal" data-bs-target="#newSubjectModal">
       New Subject
     </button>
   </div>
+
 
   <% if @subjects.any? %>
     <div class="row">
       <% @subjects.each do |subject| %>
         <% random_light_color = "hsl(#{rand(360)}, #{rand(30..70)}%, #{rand(80..95)}%)" %>
         <div class="col-md-3 mb-4">
-          <div class="card clickable-card" style="background-color: <%= random_light_color %>;">
+          <div class="card clickable-card subject-card shadow-sm" style="background-color: <%= random_light_color %>;">
             <div class="card-body text-center" onclick="window.location.href='<%= subject_chapters_path(subject) %>'">
               <h5 class="card-title mb-0">
                 <span class="subject-title"><%= subject.name %></span>
               </h5>
             </div>
-            <div class="mt-2 d-flex justify-content-center gap-4 mb-3">
-              <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editSubjectModal<%= subject.id %>">
-                Edit
-              </button>
-              <%= button_to "Delete", subject, method: :delete, class: "btn btn-sm btn-danger", data: { confirm: 'Are you sure?' } %>
+            <div class="card-options position-absolute" style="top: 5px; right: 5px;">
+              <div class="dropdown">
+                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton<%= subject.id %>" data-bs-toggle="dropdown" aria-expanded="false" data-dropdown-id="dropdownMenu<%= subject.id %>">
+                  ...
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" id="dropdownMenu<%= subject.id %>" aria-labelledby="dropdownMenuButton<%= subject.id %>">
+                  <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editSubjectModal<%= subject.id %>">Edit</button></li>
+                  <li><%= button_to "Delete", subject, method: :delete, class: "dropdown-item text-danger", data: { confirm: 'Are you sure?' } %></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -46,7 +62,7 @@
                 <% end %>
               </div>
             </div>
-          </div>  
+          </div>
         </div>
       <% end %>
     </div>
@@ -78,3 +94,18 @@
     </div>
   </div>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const searchForm = document.getElementById('search-form');
+    let debounceTimer;
+
+    searchInput.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      
+      debounceTimer = setTimeout(function() {
+        searchForm.submit();
+      }, 500);
+    });
+  });
+</script>

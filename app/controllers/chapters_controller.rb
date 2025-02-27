@@ -7,6 +7,7 @@ class ChaptersController < ApplicationController
 
 	def index
 		@chapters = @subject.chapters.order(created_at: :desc)
+		@chapters = @chapters.where("name ILIKE ?", "%#{params[:search]}%") if params[:search].present?
 	end
 	
 	def show

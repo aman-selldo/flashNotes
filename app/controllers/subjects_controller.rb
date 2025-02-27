@@ -4,7 +4,14 @@ class SubjectsController < ApplicationController
   def index
     redirect_to subjects_path if request.fullpath == "/"
 
-    @subjects = current_user.subjects.order(created_at: :desc)
+    if current_user.present?
+      @subjects = current_user.subjects.order(created_at: :desc)
+    else
+      redirect_to login_path, notice: "Login required"
+    end
+    if params[:search].present?
+      @subjects = current_user.subjects.where("name ILIKE ?", "%#{params[:search]}%")
+    end
     @subject = Subject.new
   end
 

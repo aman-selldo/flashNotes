@@ -13,7 +13,14 @@
 
 <body class="bg-light ">
 
-  <%= render "layouts/navbar"%>
+
+  <% if current_user%>
+    <%= render 'layouts/navbar'%>
+  <%end%>
+
+  
+
+  
 
 
 <% if notice %>
