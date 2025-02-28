@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_17_094456) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_28_065516) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -28,6 +28,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_17_094456) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["subject_id"], name: "index_chapters_on_subject_id"
+  end
+
+  create_table "collaborations", force: :cascade do |t|
+    t.bigint "subject_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "owner_id", null: false
+    t.string "status", null: false
+    t.string "access_level", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["subject_id"], name: "index_collaborations_on_subject_id"
+    t.index ["user_id"], name: "index_collaborations_on_user_id"
   end
 
   create_table "paragraphs", force: :cascade do |t|
@@ -68,6 +80,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_17_094456) do
 
   add_foreign_key "answers", "questions"
   add_foreign_key "chapters", "subjects"
+  add_foreign_key "collaborations", "subjects"
+  add_foreign_key "collaborations", "users"
   add_foreign_key "paragraphs", "chapters"
   add_foreign_key "paragraphs", "users"
   add_foreign_key "questions", "paragraphs"

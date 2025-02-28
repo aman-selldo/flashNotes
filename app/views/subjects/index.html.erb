@@ -2,20 +2,18 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Your Subjects</h1>
 
-  <div class="d-flex">
-  <%= form_with url: subjects_path, method: :get, local: true, class: "me-2 d-flex", id: "search-form" do |f| %>
-    <%= f.text_field :search, value: params[:search], placeholder: "Search subjects...", 
-    class: "form-control me-2", id: "search-input" %>
-    <%= f.submit "Search", class: "btn btn-outline-primary", id: "search-button" %>
-  <% end %>
-</div>
-
+    <div class="d-flex">
+      <%= form_with url: subjects_path, method: :get, local: true, class: "me-2 d-flex", id: "search-form" do |f| %>
+        <%= f.text_field :search, value: params[:search], placeholder: "Search subjects...", 
+        class: "form-control me-2", id: "search-input" %>
+        <%= f.submit "Search", class: "btn btn-outline-primary", id: "search-button" %>
+      <% end %>
+    </div>
 
     <button type="button" class="btn btn-primary new-subject-btn" data-bs-toggle="modal" data-bs-target="#newSubjectModal">
       New Subject
     </button>
   </div>
-
 
   <% if @subjects.any? %>
     <div class="row">
@@ -33,9 +31,12 @@
                 <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton<%= subject.id %>" data-bs-toggle="dropdown" aria-expanded="false" data-dropdown-id="dropdownMenu<%= subject.id %>">
                   ...
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end" id="dropdownMenu<%= subject.id %>" aria-labelledby="dropdownMenuButton<%= subject.id %>">
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-up" id="dropdownMenu<%= subject.id %>" aria-labelledby="dropdownMenuButton<%= subject.id %>">
                   <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editSubjectModal<%= subject.id %>">Edit</button></li>
-                  <li><%= button_to "Delete", subject, method: :delete, class: "dropdown-item text-danger", data: { confirm: 'Are you sure?' } %></li>
+                  <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addCollaboratorModal<%= subject.id %>">
+                    Add Collaborator </button>
+                  </li>
+                  <li><%= button_to "Delete", subject, method: :delete, class: "dropdown-item text-danger", data: {turbo: false} %></li>
                 </ul>
               </div>
             </div>
@@ -57,6 +58,36 @@
                   </div>
                   <div class="modal-footer">
                     <%= f.submit "Update Subject", class: "btn btn-success" %>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <%# Collaborator Modal %>
+        <div class="modal fade" id="addCollaboratorModal<%= subject.id %>" tabindex="-1" aria-labelledby="addCollaboratorModalLabel<%= subject.id %>" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addCollaboratorModalLabel<%= subject.id %>">Add Collaborator</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <%= form_with url: subject_collaborations_path(subject), method: :post, local: true, data: { turbo: false } do |f| %>
+                  <div class="mb-3">
+                    <%= f.label :username, "Collaborator username", class: "form-label" %>
+                    <%= f.text_field :username, class: "form-control", required: true, placeholder: "Enter username of Collaborator" %>
+                  </div>
+
+                  <div class="mb-3">
+                    <%= f.label :access_level, "Permission Type", class: "form-label" %>
+                    <%= f.select :access_level, [["Read Only", "read_only"], ["Edit", "edit"]], {}, { class: "form-select", required: true } %>
+                  </div>
+
+                  <div class="modal-footer">
+                    <%= f.submit "Send Invitation", class: "btn btn-success" %>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                   </div>
                 <% end %>
@@ -94,6 +125,7 @@
     </div>
   </div>
 </div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search-input');

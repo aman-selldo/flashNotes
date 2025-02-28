@@ -22,6 +22,7 @@ Rails.application.routes.draw do
 
 
   resources :subjects do
+    resources :collaborations
     resources :chapters do 
       resources :paragraphs do
         resources :questions do

@@ -6,6 +6,9 @@ class User < ApplicationRecord
     has_many :paragraphs, dependent: :destroy
     has_many :questions, through: :paragraphs
 
+    has_many :collaborations, dependent: :destroy
+    has_many :collaborated_subjects, through: :collaborations, source: :subject
+    
     validates :username, presence: true, uniqueness: true
     validates :email, presence: true, uniqueness: true , format: { with: URI::MailTo::EMAIL_REGEXP, message: "Please Enter Valid Email Address" }
     validates :password, presence: true, length: {minimum: 5}
