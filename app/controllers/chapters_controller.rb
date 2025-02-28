@@ -1,7 +1,7 @@
 class ChaptersController < ApplicationController
 
+	before_action :authenticate_user
 	before_action :set_subject
-
 	before_action :set_chapter, only: [:show, :update, :destroy, :edit]
 
 
@@ -53,29 +53,31 @@ class ChaptersController < ApplicationController
 	private
 
 	def set_subject
-		@subject = Subject.find_by(id: params[:subject_id])
-
+		@subject = current_user.subjects.find_by(id: params[:subject_id])
 		unless @subject
 			redirect_to subjects_path, notice: "Subject not found!!"
+			return false
 		end
 	end
 
 	def set_chapter
 		return unless params[:id]
-
-		unless @subject
-			redirect_to subjects_path, notice: "Subject not found!!" and return
-		end
-
 		@chapter = @subject.chapters.find_by(id: params[:id])
-
 		unless @chapter
-			redirect_to subject_chapters_path(@subject), notice: "Chapter not found!!" and return
+			redirect_to subject_chapters_path(@subject), notice: "Chapter not found!!"
+			return false
 		end
 	end
 
 	def chapter_params
 		params.require(:chapter).permit(:name)
 	end
+
+	def authenticate_user
+    unless current_user
+      redirect_to login_path, notice: "You need to login first"
+			return false
+    end
+  end
 
 end

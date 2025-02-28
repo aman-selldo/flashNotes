@@ -1,4 +1,5 @@
 class SubjectsController < ApplicationController
+  before_action :authenticate_user
   before_action :set_subject, only: [:show, :edit, :update, :destroy]
 
   def index
@@ -69,6 +70,7 @@ class SubjectsController < ApplicationController
       @subject = current_user.subjects.find_by(id: params[:id])
       unless @subject
         redirect_to subjects_path, alert: "Subject not found or you don't have permission"
+        return false
       end
     else
       redirect_to login_path, notice: "Something went wrong!!"
@@ -78,6 +80,7 @@ class SubjectsController < ApplicationController
   def authenticate_user
     unless current_user
       redirect_to login_path, notice: "You need to login first"
+      return false
     end
   end
 end
