@@ -11,8 +11,12 @@ development:
   database: flashnotes
 
 test:
-  <<: *default
-  database: flashnotes
+  adapter: postgresql
+  encoding: unicode
+  database: flashnotes_test
+  username: aman
+  password: aman
+  host: localhost
 
 production:
   <<: *default
