@@ -1,7 +1,7 @@
 <div class="container">
   <h2>Paragraphs in <%= @chapter.name %></h2>
 
-  <%= link_to "New Paragraph", new_subject_chapter_paragraph_path(@chapter.subject, @chapter), class: "btn btn-primary mb-3" %>
+  <%= link_to "New Topic", new_subject_chapter_paragraph_path(@chapter.subject, @chapter), class: "btn btn-primary mb-3" %>
 
   <% if @paragraphs.present? %>
     <table class="table table-striped">

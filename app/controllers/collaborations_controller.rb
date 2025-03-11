@@ -11,7 +11,7 @@ class CollaborationsController < ApplicationController
     user = User.find_by(username: username)
     
     unless user
-      redirect_to subject_path(@subject), alert: "User with that email not found"
+      redirect_to subject_path(@subject), alert:"Please enter valid username!!"
       return
     end
     
