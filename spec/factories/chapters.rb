@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :chapter do
-    name { "reproduction" }
+    name { "resonance" }
     association :subject
   end
 end

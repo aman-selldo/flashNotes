@@ -35,7 +35,7 @@ class SubjectsController < ApplicationController
     if @subject.save
       redirect_to subjects_path, notice: "Subject was created successfully"
     else
-      render :new
+      redirect_to subjects_path, status: :unprocessable_entity
     end
   end
 
@@ -46,14 +46,14 @@ class SubjectsController < ApplicationController
     if @subject.update(subject_params)
       redirect_to subjects_path, notice: "Subject updated successfully!!"
     else
-      render :edit
+      render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
     if @subject
       @subject.destroy
-      redirect_to subjects_path, notice: "Subject deleted Successfully"
+      redirect_to subjects_path, notice: "Subject deleted Successfully", status: :ok
     else
       redirect_to subjects_path, alert: "Subject not found or you don't have permission"
     end
@@ -80,7 +80,7 @@ class SubjectsController < ApplicationController
   def authenticate_user
     unless current_user
       redirect_to login_path, notice: "You need to login first"
-      return false
+      return
     end
   end
 end

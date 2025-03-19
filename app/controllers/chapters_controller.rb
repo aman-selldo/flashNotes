@@ -39,7 +39,7 @@ class ChaptersController < ApplicationController
 
 	def update
 		if @chapter.update(chapter_params)
-			redirect_to subject_chapters_path(@subject), notice: "Chapter updated successfully!!"
+			redirect_to subject_chapters_path(@subject), notice: "Chapter updated successfully!!", status: :ok
 		else
 			render :edit
 		end
@@ -47,7 +47,7 @@ class ChaptersController < ApplicationController
 
 	def destroy		
 		@chapter.destroy
-		redirect_to subject_chapters_path(@subject), notice: "Chapter deleted successfully!!"
+		redirect_to subject_chapters_path(@subject), notice: "Chapter deleted successfully!!", status: :ok
 	end
 
 	private

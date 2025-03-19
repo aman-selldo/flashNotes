@@ -52,18 +52,18 @@ class AuthController < ApplicationController
     end
 
     def logout
-        cookies.delete(:jwt)
-        flash[:notice] = "Logged out Successfully"
-        redirect_to login_path
+      cookies.delete(:jwt)
+      flash[:notice] = "Logged out Successfully"
+      redirect_to login_path
     end
 
     private
 
     def user_params
-        params.require(:user).permit(:username, :email, :password, :password_confirmation)
+      params.require(:user).permit(:username, :email, :password, :password_confirmation)
     end
 
     def generate_jwt(user)
-        JWT.encode({user_id: user.id, role: user.role, exp: 24.hours.from_now.to_i}, SECRET_KEY, 'HS256')
+      JWT.encode({user_id: user.id, role: user.role, exp: 24.hours.from_now.to_i}, SECRET_KEY, 'HS256')
     end
 end
