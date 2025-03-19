@@ -35,6 +35,7 @@ RSpec.configure do |config|
     Rails.root.join('spec/fixtures')
   ]
 
+
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.
@@ -62,4 +63,23 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+  # In rails_helper.rb
+
+end
+RSpec.configure do |config|
+  # ... other configurations
+  config.include FactoryBot::Syntax::Methods
+end
+
+module JwtHelpers
+  def generate_jwt_token_for(user)
+    # Use the same JWT generation logic that your app uses
+    # This is just an example - adjust based on your actual JWT implementation
+    payload = { user_id: user.id, exp: 24.hours.from_now.to_i }
+    JWT.encode(payload, Rails.application.secrets.secret_key_base)
+  end
+end
+
+RSpec.configure do |config|
+  config.include JwtHelpers, type: :request
 end
