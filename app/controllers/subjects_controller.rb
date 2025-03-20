@@ -25,11 +25,6 @@ class SubjectsController < ApplicationController
     end
   end
 
-  def new
-    @subject = Subject.new
-    redirect_to subjects_path
-  end
-
   def create
     @subject = current_user.subjects.build(subject_params)
     if @subject.save
@@ -80,7 +75,7 @@ class SubjectsController < ApplicationController
   def authenticate_user
     unless current_user
       redirect_to login_path, notice: "You need to login first"
-      return
+      return false
     end
   end
 end

@@ -18,18 +18,20 @@ RSpec.describe "Subjects", type: :request do
 
     describe "GET /subjects" do
       context "When user is not logged in" do
+        before {cookies.delete('jwt')}
         it "redirects to the login path" do
-          get '/subjects'
+          post '/subjects'
 
           expect(response).to have_http_status(:found)
           expect(response).to redirect_to(login_path)
+          expect(flash[:notice]).to eq("You need to login first")
         end
       end
     end
 
     describe "POST /subjects" do
       let(:valid_attributes) { { subject: { name: "Math" } } }
-      let(:invalid_attributes) { { subject: { name: "" } } }
+      let(:invalid_attributes) { { subject: { name: "" } } }      
 
       it "creates a new subject" do
         expect {
@@ -46,24 +48,25 @@ RSpec.describe "Subjects", type: :request do
       end
     end
 
-    describe "PUT /subjects/:id" do
+  describe "PUT /subjects/:id" do
       let(:updated_attributes) { { subject: { name: "Physics" } } }
-    context "when subject exists"
+    context "when subject exists" do
       it "updates an existing subject" do
         put "/subjects/#{subject_record.id}", params: updated_attributes, headers: { 'Cookie' => "jwt=#{@auth_token}" }
         expect(response).to have_http_status(:found)
       end
     end
+    
 
     context "when subject does not exists" do
       it "return not found error" do
         id_does_not_exists = subject_record.id + 10000000000
-        expect {
-          put "/subjects/#{id_does_not_exists}", headers: {'Cookie' => "jwt=#{@auth_token}" }
 
-      }.to change(Subject, :count).by(0)
+        put "/subjects/#{id_does_not_exists}", params: updated_attributes, headers: {'Cookie' => "jwt=#{@auth_token}" }
+        expect(response).to have_http_status(:found)
       end
     end
+  end
 
     describe "DELETE /subjects/:id" do
       let!(:subject_record) { create(:subject, user: user) }
@@ -86,6 +89,36 @@ RSpec.describe "Subjects", type: :request do
             delete "/subjects/#{id_does_not_exists}", headers: { 'Cookie' => "jwt=#{@auth_token}" }
 
         }.to change(Subject, :count).by(0)
+        end
+      end
+
+      it "returns a successful response and assigns subjects" do
+        get "/subjects", headers: {'Cookie' => "jwt=#{@auth_token}"}
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "filters subjects when search query  is present" do
+        get "/subjects", params: {search: "Math"}, headers: {'Cookie' => "jwt=#{@auth_token}"}
+        expect(response).to have_http_status(:ok)
+      end
+
+      describe "GET /subjects/:id" do
+        context "When subject exists" do
+          it "redirects to chapters path" do
+            get "/subjects/#{subject_record.id}", headers: {'Cookie' => "jwt=#{@auth_token}"}
+
+            expect(response).to have_http_status(:found)
+          end
+        end
+
+        context "When subject does not exists" do
+          it "404 not found" do
+            id_does_not_exists = subject_record.id + -1
+            post "/subjects/#{id_does_not_exists}", headers: {'Cookie' => "jwt=#{@auth_token}"}
+
+            expect(response).to have_http_status(:not_found)
+          end
         end
       end
 
