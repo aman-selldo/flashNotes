@@ -1,6 +1,8 @@
 FactoryBot.define do
   factory :paragraph do
-    content { "This is a sample paragraph content." }
+    sequence(:title) { |n| "Paragraph Title #{n}" }
+    content { "This is sample content for the paragraph." }
     association :chapter
+    association :user
   end
 end

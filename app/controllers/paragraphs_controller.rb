@@ -18,19 +18,13 @@ class ParagraphsController < ApplicationController
     @questions = @paragraph.questions.includes(:answers)
   end
   
-
-  def new
-    @paragraph = @chapter.paragraphs.new
-    redirect_to subject_chapter_paragraphs_path
-  end
-
   def create
     @paragraph = @chapter.paragraphs.new(paragraph_params)
     @paragraph.user = current_user
     if @paragraph.save
       redirect_to subject_chapter_paragraphs_path(@chapter.subject, @chapter), notice: "Paragraph created successfully!!" 
     else
-      render :new, alert: "Something went wrong!!"
+      redirect_to subject_chapter_paragraphs_path, alert: "Something went wrong!!"
     end
   end
 
@@ -42,7 +36,7 @@ class ParagraphsController < ApplicationController
     if @paragraph.update(paragraph_params)
       redirect_to subject_chapter_paragraphs_path(@chapter.subject, @chapter), notice: "Paragraph updated successfully."
     else
-      render :edit, alert: "Something went wrong!!"
+      redirect_to subject_chapter_paragraphs_path, alert: "Something went wrong!!"
     end
   end
 

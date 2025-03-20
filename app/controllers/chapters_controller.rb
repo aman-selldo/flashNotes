@@ -16,18 +16,12 @@ class ChaptersController < ApplicationController
 		redirect_to subject_chapter_paragraphs_path(@subject.id, @chapter.id)
 	end
 
-	def new
-		@subject = Subject.find(params[:subject_id])
-		@chapter = @subject.chapters.new
-		redirect_to subject_chapters_path
-	end
-
 	def create
 		@chapter = @subject.chapters.new(chapter_params)
 		if @chapter.save
 			redirect_to subject_chapters_path(@subject), notice: "Chapter created successfully!!"
 		else
-			render :new
+			redirect_to subject_chapters_path, status: :found
 		end
 	end
 
@@ -39,9 +33,9 @@ class ChaptersController < ApplicationController
 
 	def update
 		if @chapter.update(chapter_params)
-			redirect_to subject_chapters_path(@subject), notice: "Chapter updated successfully!!", status: :ok
+			redirect_to subject_chapters_path(@subject), notice: "Chapter updated successfully!!"
 		else
-			render :edit
+			redirect_to subject_chapters_path, status: :found
 		end
 	end
 
