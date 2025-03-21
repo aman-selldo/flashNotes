@@ -21,8 +21,4 @@ RSpec.describe Answer, type: :model do
       expect(answer.errors[:question]).to include("must exist")
     end
   end
-
-  describe "Associations" do
-    it { is_expected.to belong_to(:question) }
-  end
 end

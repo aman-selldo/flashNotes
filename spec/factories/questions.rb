@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :question do
-    sequence(:title) { |n| "Question #{n}" }
+    sequence(:question) { |n| "Question #{n}" }
     association :paragraph
   end
 end

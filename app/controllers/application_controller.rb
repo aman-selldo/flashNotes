@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_request
 
   def authenticate_request
-    cookie = cookies.signed[:jwt]
+    cookie = cookies.signed[:jwt] ? cookies.signed[:jwt] : cookies[:jwt]
     if cookie
       begin
         decoded = JWT.decode(cookie, SECRET_KEY, true, algorithm: 'HS256')[0]

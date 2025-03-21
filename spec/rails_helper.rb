@@ -34,6 +34,7 @@ RSpec.configure do |config|
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
   ]
+  Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your

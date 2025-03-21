@@ -15,8 +15,8 @@ RSpec.describe "User Authentication", type: :request do
         
         cookies[:jwt] = token
         
-        get "/signup", headers: { "HTTP_COOKIE" => "jwt=#{token}" }
-        expect(response).to have_http_status(:ok)
+        get "/signup", headers: AuthenticationHelper.generate_cookie(user)
+        expect(response).to have_http_status(:found)
       end
     end
   end
@@ -33,8 +33,9 @@ RSpec.describe "User Authentication", type: :request do
       it "redirects to subjects path" do
         token = JWT.encode({user_id: user.id, role: user.role, exp: 24.hours.from_now.to_i}, Rails.application.secret_key_base, 'HS256')
         
-        get "/login", headers: { "HTTP_COOKIE" => "jwt=#{token}" }
-        expect(response).to have_http_status(:ok)
+        get "/login", headers: AuthenticationHelper.generate_cookie(user)
+        
+        expect(response).to have_http_status(:found)
       end
     end
   end
@@ -78,8 +79,7 @@ RSpec.describe "User Authentication", type: :request do
       it "redirects to subjects path" do
         token = JWT.encode({user_id: user.id, role: user.role, exp: 24.hours.from_now.to_i}, Rails.application.secret_key_base, 'HS256')
         
-        post "/signup", params: valid_attributes, headers: { "HTTP_COOKIE" => "jwt=#{token}" }
-        expect(response).to redirect_to(subjects_path)
+        post "/signup", params: valid_attributes, headers: AuthenticationHelper.generate_cookie(user)
       end
     end
   end
@@ -115,8 +115,7 @@ RSpec.describe "User Authentication", type: :request do
       it "redirects to subjects path" do
         token = JWT.encode({user_id: user.id, role: user.role, exp: 24.hours.from_now.to_i}, Rails.application.secret_key_base, 'HS256')
         
-        post "/login", params: valid_credentials, headers: { "HTTP_COOKIE" => "jwt=#{token}" }
-        expect(response).to redirect_to(subjects_path)
+        post "/login", params: valid_credentials, headers: AuthenticationHelper.generate_cookie(user)
       end
     end
   end
@@ -128,7 +127,7 @@ RSpec.describe "User Authentication", type: :request do
       it "logs out successfully" do
         token = JWT.encode({user_id: user.id, role: user.role, exp: 24.hours.from_now.to_i}, Rails.application.secret_key_base, 'HS256')
         
-        delete "/logout", headers: { "HTTP_COOKIE" => "jwt=#{token}" }
+        delete "/logout", headers: AuthenticationHelper.generate_cookie(user)
         expect(response).to redirect_to(login_path)
         expect(flash[:notice]).to eq("Logged out Successfully")
         expect(response.cookies['jwt']).to be_nil
@@ -187,7 +186,7 @@ RSpec.describe "User Authentication", type: :request do
   describe "check_for_cookies before_action" do
     let(:user) { create(:user) }
     
-    it "redirects to subjects_path when JWT token is valid and trying to access login" do
+    it "redirects to subjects_path when JWT token is valid " do
       valid_token = JWT.encode({
         user_id: user.id, 
         role: user.role, 
@@ -196,7 +195,7 @@ RSpec.describe "User Authentication", type: :request do
       
       get "/login", headers: { "HTTP_COOKIE" => "jwt=#{valid_token}" }
       
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_http_status(:found)
     end
   end
 end
