@@ -24,6 +24,10 @@ gem "pg"
 
 gem "pry"
 
+gem 'dotenv-rails', '~> 2.1', '>= 2.1.1'
+
+gem 'gemini-ai', '~> 4.2'
+
 gem 'bcrypt', '~> 3.1.7'
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
@@ -32,9 +36,6 @@ gem 'bcrypt', '~> 3.1.7'
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
-gem "solid_cache"
-gem "solid_queue"
-gem "solid_cable"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false

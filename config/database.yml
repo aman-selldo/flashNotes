@@ -20,6 +20,4 @@ test:
 
 production:
   <<: *default
-  database: flashnotes
-  username: aman
-  password: aman
+  url: <%= ENV['DATABASE_URL'] %>

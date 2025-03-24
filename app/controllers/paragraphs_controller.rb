@@ -14,7 +14,6 @@ class ParagraphsController < ApplicationController
   end
 
   def show
-    @subject = @chapter.subject
     @questions = @paragraph.questions.includes(:answers)
   end
   
