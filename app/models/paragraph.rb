@@ -6,7 +6,7 @@ class Paragraph < ApplicationRecord
   
   validates :chapter, presence: true
   validates :user, presence: true
-  validates :title, presence: true, length: {maximum: 30}
+  validates :title, presence: true, length: {maximum: 40}
   validates :content, presence: true
 
 end
