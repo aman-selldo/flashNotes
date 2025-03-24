@@ -25,7 +25,7 @@ class ParagraphsController < ApplicationController
       
       redirect_to subject_chapter_paragraphs_path(@chapter.subject, @chapter), notice: "Paragraph created successfully!!" 
     else
-      redirect_to subject_chapter_paragraphs_path, alert: "Something went wrong!!"
+      redirect_to subject_chapter_paragraphs_path, alert: flash[:alert] = @paragraph.errors.full_messages.to_sentence
     end
   end
 
