@@ -5,7 +5,7 @@ class ParagraphsController < ApplicationController
   before_action :set_paragraph, only: [:show, :update, :destroy, :edit]
 
   def index
-    @paragraphs = @chapter.paragraphs
+    @paragraphs = @chapter.paragraphs.order(updated_at: :desc)
     @chapter = Chapter.find(params[:chapter_id])
     @subject = @chapter.subject
     if params[:search].present?
@@ -21,6 +21,8 @@ class ParagraphsController < ApplicationController
     @paragraph = @chapter.paragraphs.new(paragraph_params)
     @paragraph.user = current_user
     if @paragraph.save
+      res = generate_questions_and_answers(@paragraph)
+      
       redirect_to subject_chapter_paragraphs_path(@chapter.subject, @chapter), notice: "Paragraph created successfully!!" 
     else
       redirect_to subject_chapter_paragraphs_path, alert: "Something went wrong!!"
@@ -89,6 +91,26 @@ class ParagraphsController < ApplicationController
     unless current_user
       redirect_to login_path, notice: "You need to login first"
       return false
+    end
+  end
+
+
+  def generate_questions_and_answers(paragraph)
+    gemini_service = GeminiService.new 
+    response_text = gemini_service.generate_questions_and_answers(paragraph.content)
+  
+    if response_text.present?
+      begin
+          response_text.map do |h|
+            question = paragraph.questions.create!(question: h[:question])
+            question.answers.create!(answer: h[:answer])
+          end
+    
+      rescue => e
+        Rails.logger.error "Error parsing questions & answers: #{e.message}"
+      end
+    else
+      Rails.logger.error "No response from Gemini API"
     end
   end
 end
