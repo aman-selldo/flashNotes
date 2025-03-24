@@ -1,7 +1,7 @@
 require 'httparty'
 require 'json'
 
-class GeminiApiService
+class GeminiService
   include HTTParty
   base_uri 'https://generativelanguage.googleapis.com/v1beta/models'
 
