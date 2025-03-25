@@ -35,6 +35,9 @@ class ParagraphsController < ApplicationController
 
   def update
     if @paragraph.update(paragraph_params)
+      if @paragraph.saved_change_to_content?
+        res = generate_questions_and_answers(@paragraph)
+      end
       redirect_to subject_chapter_paragraphs_path(@chapter.subject, @chapter), notice: "Paragraph updated successfully."
     else
       redirect_to subject_chapter_paragraphs_path, alert: "Something went wrong!!"

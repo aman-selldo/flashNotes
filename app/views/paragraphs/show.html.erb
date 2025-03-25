@@ -18,7 +18,7 @@
           <div class="question-card" data-question-id="<%= question.id %>" data-answers='<%= question.answers.map(&:answer).to_json %>'
           style="background-color: <%= random_light_color %>;">
             <div class="card-content">
-              <h5 class="card-title">Q: <%= question.question %></h5>
+              <h5 class="card-title">Q: <%= question.question.html_safe %></h5>
               <p class="card-text-hint">Click to reveal answer</p>
             </div>
           </div>
@@ -77,6 +77,7 @@
     height: 300px;
     perspective: 1000px;
     cursor: pointer;
+    will-change: transform;
   }
 
   .flip-card-inner {
@@ -85,6 +86,7 @@
     height: 100%;
     transition: transform 0.6s;
     transform-style: preserve-3d;
+    will-change: transform;
   }
 
   .flip-card-front, .flip-card-back {
@@ -92,10 +94,11 @@
     width: 100%;
     height: 100%;
     -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     overflow: hidden;
+    pointer-events: auto;
   }
 
   .flip-card-front {
@@ -133,6 +136,7 @@
     z-index: 1001;
     width: 80%;
     max-width: 500px;
+    will-change: transform;
   }
 </style>
 
@@ -156,7 +160,7 @@
                 <ul class="list-unstyled">
                   <% question.answers.each do |answer| %>
                     <li>
-                      <strong>Answer:</strong> <%= answer.answer %>
+                      <strong>Answer:</strong> '<%= escape_javascript(sanitize(answer.answer))%>'
                     </li>
                   <% end %>
                 </ul>

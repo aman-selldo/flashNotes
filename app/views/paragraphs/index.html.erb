@@ -51,18 +51,22 @@
               </div>
               <div class="modal-body">
                 <%= form_with model: paragraph, url: subject_chapter_paragraph_path(@chapter.subject, @chapter, paragraph), method: :patch, local: true, data: { turbo: false } do |f| %>
+
                   <div class="mb-3">
                     <%= f.label :title, "Title", class: "form-label" %>
                     <%= f.text_field :title, class: "form-control", required: true %>
                   </div>
+
                   <div class="mb-3">
                     <%= f.label :content, "Content", class: "form-label" %>
                     <%= f.text_area :content, class: "form-control", rows: 6, required: true %>
                   </div>
+
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <%= f.submit "Update Topic", class: "btn btn-success" %>
                   </div>
+
                 <% end %>
               </div>
             </div>
@@ -124,11 +128,11 @@
       }, 500);
     });
     
-    if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+    <%# if (!document.querySelector('link[href*="bootstrap-icons"]')) {
       const iconLink = document.createElement('link');
       iconLink.rel = 'stylesheet';
       iconLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css';
       document.head.appendChild(iconLink);
-    }
+    } %>
   });
 </script> 
