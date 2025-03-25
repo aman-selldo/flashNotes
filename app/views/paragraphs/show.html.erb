@@ -87,6 +87,8 @@
     transition: transform 0.6s;
     transform-style: preserve-3d;
     will-change: transform;
+    -moz-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 
   .flip-card-front, .flip-card-back {
@@ -125,6 +127,9 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
     z-index: 1000;
+
+  -moz-transform: translateZ(0);
+  transform: translateZ(0);
   }
 
   .modal-card-container {
@@ -137,6 +142,9 @@
     width: 80%;
     max-width: 500px;
     will-change: transform;
+
+  -moz-transform: translate(-50%, -50%) translateZ(0);
+  will-change: transform, opacity;
   }
 </style>
 
