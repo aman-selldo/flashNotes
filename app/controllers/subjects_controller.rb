@@ -48,7 +48,7 @@ class SubjectsController < ApplicationController
   def destroy
     if @subject
       @subject.destroy
-      redirect_to subjects_path, notice: "Subject deleted Successfully", status: :ok
+      redirect_to subjects_path, notice: "Subject deleted Successfully", status: :found
     else
       redirect_to subjects_path, alert: "Subject not found or you don't have permission"
     end

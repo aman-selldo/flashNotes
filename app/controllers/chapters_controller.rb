@@ -41,7 +41,7 @@ class ChaptersController < ApplicationController
 
 	def destroy		
 		@chapter.destroy
-		redirect_to subject_chapters_path(@subject), notice: "Chapter deleted successfully!!", status: :ok
+		redirect_to subject_chapters_path(@subject), notice: "Chapter deleted successfully!!", status: :found
 	end
 
 	private
