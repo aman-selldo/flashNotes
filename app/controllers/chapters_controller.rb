@@ -21,7 +21,7 @@ class ChaptersController < ApplicationController
 		if @chapter.save
 			redirect_to subject_chapters_path(@subject), notice: "Chapter created successfully!!"
 		else
-			redirect_to subject_chapters_path, status: :found
+			redirect_to subject_chapters_path, status: :found, alert: @chapter.errors.full_messages.to_sentence
 		end
 	end
 
