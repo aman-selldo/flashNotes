@@ -30,7 +30,7 @@ class SubjectsController < ApplicationController
     if @subject.save
       redirect_to subjects_path, notice: "Subject was created successfully"
     else
-      redirect_to subjects_path, status: :unprocessable_entity
+      redirect_to subjects_path, alert: @subject.errors.full_messages.to_sentence
     end
   end
 
@@ -41,7 +41,7 @@ class SubjectsController < ApplicationController
     if @subject.update(subject_params)
       redirect_to subjects_path, notice: "Subject updated successfully!!"
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, alert: @subject.errors.full_messages.to_sentence
     end
   end
 
@@ -68,7 +68,7 @@ class SubjectsController < ApplicationController
         return false
       end
     else
-      redirect_to login_path, notice: "Something went wrong!!"
+      redirect_to login_path, alert: @subject.erros.full_messages.to_sentence
     end
   end
 
