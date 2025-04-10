@@ -24,7 +24,7 @@ gem "pg"
 
 gem "pry"
 
-gem 'dotenv-rails', '~> 2.1', '>= 2.1.1'
+gem 'dotenv-rails', '~> 3.1'
 
 gem 'gemini-ai', '~> 4.2'
 
