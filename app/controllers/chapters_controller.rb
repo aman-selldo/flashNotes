@@ -9,7 +9,7 @@ class ChaptersController < ApplicationController
 		@chapters = @subject.chapters.order(created_at: :desc)
 		@chapters = @chapters.where("name ILIKE ?", "%#{params[:search]}%") if params[:search].present?
 	end
-	
+
 	def show
 		@subject = Subject.find(params[:subject_id])
 		@chapter = @subject.chapters.find(params[:id])
@@ -39,7 +39,7 @@ class ChaptersController < ApplicationController
 		end
 	end
 
-	def destroy		
+	def destroy
 		@chapter.destroy
 		redirect_to subject_chapters_path(@subject), notice: "Chapter deleted successfully!!", status: :found
 	end

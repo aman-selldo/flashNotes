@@ -8,7 +8,6 @@
         class: "form-control me-2", id: "search-input" %>
         <%= f.submit "Search", class: "btn btn-outline-primary", id: "search-button" %>
       <% end %>
-      
       <button type="button" class="btn btn-primary new-subject-btn" data-bs-toggle="modal" data-bs-target="#newParagraphModal">
         New Topic
       </button>
@@ -61,6 +60,10 @@
                     <%= f.label :content, "Content", class: "form-label" %>
                     <%= f.text_area :content, class: "form-control", rows: 6, required: true %>
                   </div>
+                  <div class='mb-3'>
+                    <%= f.label :number, "Number of questions you want to generate", class: "form-label" %>
+                    <%= f.number_field :number, class: "form-control", required: true, min: 1, max: 10 %>
+                  </div>
 
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -103,6 +106,10 @@
               <%= f.label :content, "Content", class: "form-label" %>
               <%= f.text_area :content, class: "form-control", rows: 6, required: true %>
             </div>
+            <div class="mb-3">
+              <%= f.label :number, "Number of questions you want to generate", class: "form-label" %>
+              <%= f.number_field :number, class: "form-control", required: true, min: 1, max: 10 %>
+            </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
               <%= f.submit "Create Topic", class: "btn btn-success" %>
@@ -122,17 +129,9 @@
 
     searchInput.addEventListener('input', function() {
       clearTimeout(debounceTimer);
-      
       debounceTimer = setTimeout(function() {
         searchForm.submit();
       }, 500);
     });
-    
-    <%# if (!document.querySelector('link[href*="bootstrap-icons"]')) {
-      const iconLink = document.createElement('link');
-      iconLink.rel = 'stylesheet';
-      iconLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css';
-      document.head.appendChild(iconLink);
-    } %>
   });
-</script> 
+</script>
