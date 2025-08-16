@@ -3,7 +3,7 @@
     <h2>Topics in <%= @chapter.name %></h2>
 
     <div class="d-flex">
-      <%= form_with url: subject_chapter_paragraphs_path(@subject, @chapter), method: :get, local: true, class: "me-2 d-flex", id: "search-form" do |f| %>
+      <%= form_with(url: subject_chapter_paragraphs_path(@subject, @chapter), method: :get, local: true, class: "me-2 d-flex", id: "search-form") do |f| %>
         <%= f.text_field :search, value: params[:search], placeholder: "Search Topics...", 
         class: "form-control me-2", id: "search-input" %>
         <%= f.submit "Search", class: "btn btn-outline-primary", id: "search-button" %>
@@ -15,7 +15,7 @@
   </div>
 
   <% if @paragraphs.any? %>
-    <div class="row row-cols-1 row-cols-md-4 g-4">
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-3 g-4">
       <% @paragraphs.each do |paragraph| %>
         <% random_light_color = "hsl(#{rand(360)}, #{rand(30..50)}%, #{rand(85..95)}%)" %>
         <div class="col">
@@ -60,12 +60,19 @@
                     <%= f.label :content, "Content", class: "form-label" %>
                     <%= f.text_area :content, class: "form-control", rows: 6, required: true %>
                   </div>
-                  <div class='mb-3'>
-                    <%= f.label :number, "Number of questions you want to generate", class: "form-label" %>
-                    <%= f.number_field :number, class: "form-control", required: true, min: 1, max: 10 %>
+
+                  <div class="form-check form-switch mb-3">
+                    <%= f.check_box :generate_with_gemini, class: "form-check-input", id: "edit_generate_with_gemini_#{paragraph.id}", disabled: true, checked: true %>
+                    <%= f.label :generate_with_gemini, "Generate with Gemini", for: "edit_generate_with_gemini_#{paragraph.id}", class: "form-check-label text-muted" %>
                   </div>
 
-                  <div class="modal-footer">
+                  <div class='mb-3' data-number-field="edit" data-paragraph-id="<%= paragraph.id %>">
+                    <%= f.label :number, "Number of questions to generate", class: "form-label text-muted" %>
+                    <%= f.number_field :number, class: "form-control", min: 1, max: 10, disabled: true, value: 5 %>
+                    <small class="text-muted">Flashcard generation is disabled when editing existing topics</small>
+                  </div>
+                  <hr/>
+                  <div class="modal-footer mt-3">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <%= f.submit "Update Topic", class: "btn btn-success" %>
                   </div>
@@ -75,6 +82,61 @@
             </div>
           </div>
         </div>
+      <% end %>
+    </div>
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center mt-4 gap-3">
+      <div class="text-muted small">
+        <% start_index = ((@current_page - 1) * @per_page) + 1 %>
+        <% end_index = [@current_page * @per_page, @total_count].min %>
+        Showing <strong><%= start_index %>-<%= end_index %></strong> of <strong><%= @total_count %></strong>
+      </div>
+
+      <% if @total_pages > 1 %>
+        <nav aria-label="Paragraphs pagination">
+          <ul class="pagination mb-0">
+            <% prev_page = @current_page - 1 %>
+            <li class="page-item <%= 'disabled' if @current_page <= 1 %>">
+              <%= link_to '&laquo;'.html_safe, subject_chapter_paragraphs_path(@subject, @chapter, page: prev_page, search: params[:search]), class: 'page-link', aria: { label: 'Previous' } %>
+            </li>
+
+            <%# First page %>
+            <li class="page-item <%= 'active' if @current_page == 1 %>">
+              <%= link_to 1, subject_chapter_paragraphs_path(@subject, @chapter, page: 1, search: params[:search]), class: 'page-link' %>
+            </li>
+
+            <%# Left ellipsis %>
+            <% if @current_page > 3 %>
+              <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+            <% end %>
+
+            <%# Middle window (current-1, current, current+1) within 2..total-1 %>
+            <% ((@current_page - 1)..(@current_page + 1)).each do |p|
+                next if p <= 1 || p >= @total_pages
+            %>
+              <li class="page-item <%= 'active' if p == @current_page %>">
+                <%= link_to p, subject_chapter_paragraphs_path(@subject, @chapter, page: p, search: params[:search]), class: 'page-link' %>
+              </li>
+            <% end %>
+
+            <%# Right ellipsis %>
+            <% if @current_page < @total_pages - 2 %>
+              <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+            <% end %>
+
+            <%# Last page %>
+            <% if @total_pages > 1 %>
+              <li class="page-item <%= 'active' if @current_page == @total_pages %>">
+                <%= link_to @total_pages, subject_chapter_paragraphs_path(@subject, @chapter, page: @total_pages, search: params[:search]), class: 'page-link' %>
+              </li>
+            <% end %>
+
+            <% next_page = @current_page + 1 %>
+            <li class="page-item <%= 'disabled' if @current_page >= @total_pages %>">
+              <%= link_to '&raquo;'.html_safe, subject_chapter_paragraphs_path(@subject, @chapter, page: next_page, search: params[:search]), class: 'page-link', aria: { label: 'Next' } %>
+            </li>
+          </ul>
+        </nav>
       <% end %>
     </div>
   <% else %>
@@ -87,7 +149,7 @@
     </div>
   <% end %>
 
-  <%= link_to "Back to Chapter", subject_chapters_path(@chapter.subject), class: "btn btn-secondary mt-4", data: { turbo: false } %>
+  <%= link_to "Back to Chapter", subject_chapters_path(@chapter.subject), class: "btn btn-secondary mt-4 mb-4", data: { turbo: false } %>
 
   <div class="modal fade" id="newParagraphModal" tabindex="-1" aria-labelledby="newParagraphModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -106,11 +168,23 @@
               <%= f.label :content, "Content", class: "form-label" %>
               <%= f.text_area :content, class: "form-control", rows: 6, required: true %>
             </div>
-            <div class="mb-3">
-              <%= f.label :number, "Number of questions you want to generate", class: "form-label" %>
-              <%= f.number_field :number, class: "form-control", required: true, min: 1, max: 10 %>
+
+            <div class="form-check form-switch mb-3">
+              <%= f.check_box :generate_with_gemini, class: "form-check-input", id: "new_generate_with_gemini" %>
+              <%= f.label :generate_with_gemini, "Generate with Gemini", for: "new_generate_with_gemini", class: "form-check-label" %>
             </div>
-            <div class="modal-footer">
+
+            <div class="mb-3" id="new_number_field" style="display:none;">
+              <%= f.label :number, "Number of questions to generate", class: "form-label" %>
+              <%= f.number_field :number, class: "form-control", min: 1, max: 10 %>
+            </div>
+
+            <%# <hr/> %>
+            <%# <h6>Custom Flashcards</h6>
+            <div class="custom-qa-container" id="new_custom_qa_container"></div>
+            <button type="button" class="btn btn-outline-primary btn-sm" data-add-question="new">Add Flashcard</button> %>
+
+            <div class="modal-footer mt-3">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
               <%= f.submit "Create Topic", class: "btn btn-success" %>
             </div>
@@ -132,6 +206,83 @@
       debounceTimer = setTimeout(function() {
         searchForm.submit();
       }, 500);
+    });
+
+    const newToggle = document.getElementById('new_generate_with_gemini');
+    const newNumberField = document.getElementById('new_number_field');
+    function syncNewVisibility() {
+      if (!newToggle) return;
+      newNumberField.style.display = newToggle.checked ? 'block' : 'none';
+    }
+    if (newToggle) {
+      newToggle.addEventListener('change', syncNewVisibility);
+      syncNewVisibility();
+    }
+
+    document.querySelectorAll('[id^="edit_generate_with_gemini_"]').forEach(function(toggle) {
+      const paragraphId = toggle.id.split('_').pop();
+      const numberWrapper = document.querySelector(`[data-number-field="edit"][data-paragraph-id="${paragraphId}"]`);
+      function syncEditVisibility() {
+        if (!numberWrapper) return;
+        numberWrapper.style.display = toggle.checked ? 'block' : 'none';
+      }
+      toggle.addEventListener('change', syncEditVisibility);
+      syncEditVisibility();
+    });
+
+    function buildQuestionFields(context, paragraphId) {
+      const questionIndex = Date.now();
+      return `
+        <div class=\"border rounded p-2 mb-2\" data-question>
+          <div class=\"mb-2\">
+            <label class=\"form-label\" for=\"paragraph_questions_attributes_${questionIndex}_question\">Question</label>
+            <textarea name=\"paragraph[questions_attributes][${questionIndex}][question]\" id=\"paragraph_questions_attributes_${questionIndex}_question\" class=\"form-control\" rows=\"2\"></textarea>
+          </div>
+          <div class=\"answers-group\" data-answers>
+            <div class=\"mb-2\">
+              <label class=\"form-label\" for=\"paragraph_questions_attributes_${questionIndex}_answers_attributes_0_answer\">Answer</label>
+              <textarea name=\"paragraph[questions_attributes][${questionIndex}][answers_attributes][0][answer]\" id=\"paragraph_questions_attributes_${questionIndex}_answers_attributes_0_answer\" class=\"form-control\" rows=\"2\"></textarea>
+            </div>
+            <button type=\"button\" class=\"btn btn-sm btn-outline-secondary add-answer\" data-context=\"${context}\" ${paragraphId ? `data-paragraph-id=\"${paragraphId}\"` : ''}>Add Answer</button>
+          </div>
+          <div class=\"mt-2\">
+            <input type=\"checkbox\" name=\"paragraph[questions_attributes][${questionIndex}][_destroy]\" /> Remove this flashcard
+          </div>
+        </div>
+      `;
+    }
+
+    function buildAnswerField(questionIndex, answerIndex) {
+      return `
+        <div class=\"mb-2\">
+          <label class=\"form-label\" for=\"paragraph_questions_attributes_${questionIndex}_answers_attributes_${answerIndex}_answer\">Answer</label>
+          <textarea name=\"paragraph[questions_attributes][${questionIndex}][answers_attributes][${answerIndex}][answer]\" id=\"paragraph_questions_attributes_${questionIndex}_answers_attributes_${answerIndex}_answer\" class=\"form-control\" rows=\"2\"></textarea>
+        </div>
+      `;
+    }
+
+    document.querySelectorAll('[data-add-question]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const context = btn.getAttribute('data-add-question');
+        const paragraphId = btn.getAttribute('data-paragraph-id');
+        const container = context === 'new' ? document.getElementById('new_custom_qa_container') : document.querySelector(`.custom-qa-container[data-qa-container=\"edit\"][data-paragraph-id=\"${paragraphId}\"]`);
+        if (!container) return;
+        container.insertAdjacentHTML('beforeend', buildQuestionFields(context, paragraphId));
+      });
+    });
+
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.classList.contains('add-answer')) {
+        const questionEl = e.target.closest('[data-question]');
+        if (!questionEl) return;
+        const answersGroup = questionEl.querySelector('[data-answers]');
+        const qName = questionEl.querySelector('textarea[name^=\"paragraph[questions_attributes]\"]').getAttribute('name');
+        const qIndexMatch = qName.match(/paragraph\\[questions_attributes\\]\\[(\\d+)\\]/);
+        if (!qIndexMatch) return;
+        const questionIndex = qIndexMatch[1];
+        const existing = answersGroup.querySelectorAll('textarea[name*=\"answers_attributes\"]').length;
+        answersGroup.insertAdjacentHTML('beforeend', buildAnswerField(questionIndex, existing));
+      }
     });
   });
 </script>

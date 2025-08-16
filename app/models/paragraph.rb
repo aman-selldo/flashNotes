@@ -10,7 +10,9 @@ class Paragraph < ApplicationRecord
   validates :user, presence: true
   validates :title, presence: true, length: {maximum: 40}
   validates :content, presence: true
-  validates :number, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 10 }
+  validates :number, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 10 }, allow_nil: true
+
+  accepts_nested_attributes_for :questions, allow_destroy: true, reject_if: proc { |attrs| attrs["question"].blank? }
 
   private
 

@@ -1,5 +1,10 @@
 <div class="container mt-4">
-  <h2 class="mb-4"><%= @paragraph.title %></h2>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="mb-0"><%= @paragraph.title %></h2>
+    <button class="btn btn-primary new-subject-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#addFlashcardCanvas" aria-controls="addFlashcardCanvas">
+      Add Flashcard
+    </button>
+  </div>
 
   <% fixed_paragraph_color = "hsl(226, 48%, 84%)" %>
   <div class="card mb-4 p-3 shadow-sm" style="background-color: <%= fixed_paragraph_color %>;">
@@ -30,11 +35,60 @@
   <% end %>
 
   <div class="mt-4">
-    <%= link_to "Back to Paragraphs", subject_chapter_paragraphs_path(@chapter.subject, @chapter), class: "btn btn-secondary", data: { turbo: false } %>
+    <%= link_to "Back to Paragraphs", subject_chapter_paragraphs_path(@chapter.subject, @chapter), class: "btn btn-secondary mb-4", data: { turbo: false } %>
   </div>
 
   <div id="overlay" class="modal-overlay"></div>
   <div id="flipped-card-container" class="modal-card-container"></div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="addFlashcardCanvas" aria-labelledby="addFlashcardCanvasLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="addFlashcardCanvasLabel">Add Flashcards</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <%= form_with url: subject_chapter_paragraph_questions_path(@subject, @chapter, @paragraph), method: :post, local: true, id: "flashcard-form" do |f| %>
+      <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <label class="form-label">Flashcards</label>
+          <button type="button" class="btn btn-outline-primary btn-sm" id="add_flashcard_set_btn">
+            <i class="bi bi-plus-circle"></i> Add Another Set
+          </button>
+        </div>
+        <%# <div class="alert alert-info">
+          <small><i class="bi bi-info-circle"></i> Each set must contain both a question and an answer.</small>
+        </div> %>
+      </div>
+      
+      <div id="flashcard_sets_container">
+        <div class="flashcard-set mb-4 p-3 border rounded" data-set-index="0">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Flashcard Set #1</h6>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-set-btn" style="display: none;">×</button>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :question, "Question *", class: "form-label" %>
+            <%= f.text_area :question, name: "questions[0][question]", class: "form-control question-input", rows: 3, required: true, placeholder: "Enter your question here..." %>
+            <%# <div class="invalid-feedback">Question is required</div> %>
+          </div>
+          
+        <div class="mb-3">
+            <%= f.label :answer, "Answer *", class: "form-label" %>
+            <%= f.text_area :answer, name: "questions[0][answer]", class: "form-control answer-input", rows: 3, required: true, placeholder: "Enter the answer here..." %>
+            <%# <div class="invalid-feedback">Answer is required</div> %>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-3">
+        <button type="submit" class="btn btn-success" id="submit-btn">
+          <i class="bi"></i> Save All Flashcards
+        </button>
+      </div>
+    <% end %>
+  </div>
 </div>
 
 <style>
@@ -103,82 +157,396 @@
     pointer-events: auto;
   }
 
-  .flip-card-front {
-    z-index: 2;
-    color: #333;
+  .flip-card-front { z-index: 2; color: #333; }
+  .flip-card-back { transform: rotateY(180deg); color: #333; }
+
+  .card-title, .list-unstyled, .text-muted { width: 100%; word-wrap: break-word; }
+
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; transform: translateZ(0); }
+  .modal-card-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001; width: 80%; max-width: 500px; will-change: transform; will-change: transform, opacity; }
+
+  /* Flashcard form styles */
+  .flashcard-set {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6 !important;
+    transition: all 0.3s ease;
   }
 
-  .flip-card-back {
-    transform: rotateY(180deg);
-    color: #333;
+  .flashcard-set:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd !important;
   }
 
-  .card-title, .list-unstyled, .text-muted {
+  .remove-set-btn {
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: 0;
+  }
+
+  .remove-set-btn:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+  }
+
+  .answer-group {
+    position: relative;
+  }
+
+  .remove-answer-btn {
+    border-radius: 0 0.375rem 0.375rem 0;
+    border-left: none;
+    min-width: 40px;
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  .remove-answer-btn:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+  }
+
+  .answer-input {
+    border-right: none;
+  }
+
+  .input-group .form-control:focus {
+    border-right: none;
+    box-shadow: none;
+  }
+
+  .input-group .form-control:focus + .remove-answer-btn {
+    border-color: #86b7fe;
+  }
+
+  .alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+  }
+
+  .alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+  }
+
+  .invalid-feedback {
+    display: block;
     width: 100%;
-    word-wrap: break-word;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
   }
 
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-
-  -moz-transform: translateZ(0);
-  transform: translateZ(0);
-  }
-
-  .modal-card-container {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1001;
-    width: 80%;
-    max-width: 500px;
-    will-change: transform;
-
-  -moz-transform: translate(-50%, -50%) translateZ(0);
-  will-change: transform, opacity;
+  .form-control.is-invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='m5.8 4.6 2.4 2.4m0-2.4L5.8 7'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
   }
 </style>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const questionCards = document.querySelectorAll(".question-card");
     const overlay = document.getElementById("overlay");
     const flippedCardContainer = document.getElementById("flipped-card-container");
 
-    questionCards.forEach(card => {
-      card.addEventListener("click", function () {
-        const questionId = this.dataset.questionId;
-        const questionText = this.querySelector('.card-title').textContent;
-        const backgroundColor = this.style.backgroundColor;
+    // Use event delegation to handle clicks on all question cards (existing and newly added)
+    document.addEventListener("click", function(e) {
+      console.log('Document click event triggered on:', e.target);
+      const questionCard = e.target.closest(".question-card");
+      if (questionCard) {
+        console.log('Question card clicked via event delegation:', questionCard.dataset.questionId);
+        handleCardClick(questionCard);
+      } else {
+        console.log('Click was not on a question card');
+      }
+    });
+
+    function closeFlippedCard() {
+      overlay.style.display = "none";
+      flippedCardContainer.style.display = "none";
+      document.body.style.overflow = "auto";
+    }
+
+    const addFlashcardSetBtn = document.getElementById('add_flashcard_set_btn');
+    const flashcardSetsContainer = document.getElementById('flashcard_sets_container');
+    
+    if (addFlashcardSetBtn && flashcardSetsContainer) {
+      addFlashcardSetBtn.addEventListener('click', function() {
+        const current = flashcardSetsContainer.querySelectorAll('.flashcard-set').length;
+        const html = `
+          <div class="flashcard-set mb-4 p-3 border rounded" data-set-index="${current}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Flashcard Set #${current + 1}</h6>
+              <button type="button" class="btn btn-outline-danger btn-sm remove-set-btn">×</button>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Question *</label>
+              <textarea class="form-control question-input" name="questions[${current}][question]" rows="3" required placeholder="Enter your question here..."></textarea>
+              <%# <div class="invalid-feedback">Question is required</div> %>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Answer *</label>
+              <textarea class="form-control answer-input" name="questions[${current}][answer]" rows="3" required placeholder="Enter the answer here..."></textarea>
+              <%# <div class="invalid-feedback">Answer is required</div> %>
+            </div>
+          </div>`;
+        flashcardSetsContainer.insertAdjacentHTML('beforeend', html);
         
-        let answerHtml = '<p class="text-muted">No answers available</p>';
-        <% @paragraph.questions.each do |question| %>
-          if (questionId === "<%= question.id %>") {
-            answerHtml = `
-              <% if question.answers.any? %>
-                <ul class="list-unstyled">
-                  <% question.answers.each do |answer| %>
-                    <li>
-                      <strong>Answer:</strong> '<%= escape_javascript(sanitize(answer.answer))%>'
-                    </li>
-                  <% end %>
-                </ul>
-              <% else %>
-                <p class="text-muted">No answers available</p>
-              <% end %>
-            `;
+        // Show remove buttons for all sets except the first one
+        updateRemoveSetButtons();
+      });
+    }
+
+    // Handle remove set buttons
+    flashcardSetsContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('remove-set-btn')) {
+        e.target.closest('.flashcard-set').remove();
+        updateRemoveSetButtons();
+        reindexFlashcardSets();
+      }
+    });
+
+    // Show/hide remove buttons based on number of sets
+    function updateRemoveSetButtons() {
+      const flashcardSets = flashcardSetsContainer.querySelectorAll('.flashcard-set');
+      const removeButtons = flashcardSetsContainer.querySelectorAll('.remove-set-btn');
+      
+      removeButtons.forEach((btn, index) => {
+        if (flashcardSets.length > 1) {
+          btn.style.display = 'block';
+        } else {
+          btn.style.display = 'none';
+        }
+      });
+    }
+
+    // Reindex flashcard sets after removal
+    function reindexFlashcardSets() {
+      const flashcardSets = flashcardSetsContainer.querySelectorAll('.flashcard-set');
+      flashcardSets.forEach((set, index) => {
+        const questionTextarea = set.querySelector('.question-input');
+        const answerTextarea = set.querySelector('.answer-input');
+        
+        questionTextarea.name = `questions[${index}][question]`;
+        answerTextarea.name = `questions[${index}][answer]`;
+        
+        set.dataset.setIndex = index;
+        
+        // Update the set number display
+        const setNumber = set.querySelector('h6');
+        setNumber.textContent = `Flashcard Set #${index + 1}`;
+      });
+    }
+
+    // Form validation and AJAX submission
+    const flashcardForm = document.getElementById('flashcard-form');
+    if (flashcardForm) {
+      // Handle form submission manually with fetch API
+      flashcardForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+        
+        console.log('Form submit event triggered');
+        console.log('Form action:', this.action);
+        console.log('Form method:', this.method);
+        
+        const flashcardSets = this.querySelectorAll('.flashcard-set');
+        
+        let isValid = true;
+        
+        // Validate each flashcard set
+        flashcardSets.forEach((set, index) => {
+          const question = set.querySelector('.question-input');
+          const answer = set.querySelector('.answer-input');
+          
+          // Reset validation state
+          question.classList.remove('is-invalid');
+          answer.classList.remove('is-invalid');
+          
+          // Validate question
+          if (!question.value.trim()) {
+            question.classList.add('is-invalid');
+            isValid = false;
           }
-        <% end %>
+          
+          // Validate answer
+          if (!answer.value.trim()) {
+            answer.classList.add('is-invalid');
+            isValid = false;
+          }
+        });
         
+        if (!isValid) {
+          // Show error message
+          const alertDiv = document.createElement('div');
+          alertDiv.className = 'alert alert-danger mt-2';
+          alertDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Please fill in all required fields for each flashcard set.';
+          
+          const existingAlert = this.querySelector('.alert-danger');
+          if (existingAlert) {
+            existingAlert.remove();
+          }
+          
+          this.querySelector('#flashcard_sets_container').after(alertDiv);
+          
+          return false;
+        }
+        
+        // If validation passes, submit via fetch API
+        const formData = new FormData(this);
+        console.log('Submitting form data:', Object.fromEntries(formData));
+        
+        fetch(this.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Fetch Success Response:', data);
+          
+          if (data.success) {
+            // Add new flashcards to the display
+            addNewFlashcards(data.questions);
+            
+            // Show success message
+            showAlert('success', data.message);
+            
+            // Reset form
+            resetFlashcardForm();
+            
+            // Close offcanvas
+            const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('addFlashcardCanvas'));
+            if (offcanvas) {
+              offcanvas.hide();
+            }
+          } else {
+            showAlert('danger', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Fetch Error:', error);
+          showAlert('danger', 'An error occurred while creating flashcards. Please try again.');
+        });
+      });
+      
+      // Remove old Rails UJS event listeners - not needed with fetch API
+      // flashcardForm.addEventListener('ajax:success', function(event) { ... });
+      // flashcardForm.addEventListener('ajax:error', function(event) { ... });
+    }
+    
+    // Function to add new flashcards to the display
+    function addNewFlashcards(questions) {
+      console.log('addNewFlashcards called with:', questions);
+      const flashcardsContainer = document.querySelector('.row');
+      console.log('Flashcards container:', flashcardsContainer);
+      
+      questions.forEach(questionData => {
+        console.log('Processing question data:', questionData);
+        const randomLightColor = `hsl(${Math.floor(Math.random() * 360)}, ${Math.floor(Math.random() * 40 + 30)}%, ${Math.floor(Math.random() * 15 + 80)}%)`;
+        
+        const flashcardHtml = `
+          <div class="col-md-4 mb-4">
+            <div class="question-card" data-question-id="${questionData.id}" data-answers='${JSON.stringify([questionData.answer])}' style="background-color: ${randomLightColor};">
+              <div class="card-content">
+                <h5 class="card-title">Q: ${questionData.question}</h5>
+                <p class="card-text-hint">Click to reveal answer</p>
+              </div>
+            </div>
+          </div>`;
+        
+        console.log('Generated HTML:', flashcardHtml);
+        flashcardsContainer.insertAdjacentHTML('beforeend', flashcardHtml);
+      });
+      
+      // Force a small delay to ensure DOM is updated, then trigger a custom event
+      setTimeout(() => {
+        // Dispatch a custom event to notify that new cards were added
+        document.dispatchEvent(new CustomEvent('flashcardsAdded'));
+        
+        // Debug: Check if new cards are accessible
+        const allCards = document.querySelectorAll('.question-card');
+        console.log('Total question cards after adding:', allCards.length);
+        console.log('New cards data attributes:', Array.from(allCards).map(card => ({
+          id: card.dataset.questionId,
+          answers: card.dataset.answers
+        })));
+        
+        // Test: Manually add click event to the last added card to ensure it works
+        const lastAddedCard = allCards[allCards.length - 1];
+        if (lastAddedCard) {
+          console.log('Testing click on last added card:', lastAddedCard.dataset.questionId);
+          // This is just for testing - the event delegation should handle it
+          
+          // Additional test: Verify the card has proper event handling
+          testCardClickability(lastAddedCard);
+        }
+      }, 100);
+    }
+    
+    // Function to test if a card is clickable
+    function testCardClickability(card) {
+      console.log('Testing clickability for card:', card.dataset.questionId);
+      console.log('Card element:', card);
+      console.log('Card has click event:', card.onclick);
+      console.log('Card dataset:', card.dataset);
+      
+      // Try to simulate a click programmatically to test
+      try {
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        card.dispatchEvent(clickEvent);
+        console.log('Programmatic click dispatched successfully');
+      } catch (error) {
+        console.error('Error dispatching programmatic click:', error);
+      }
+    }
+    
+    // Function to handle card click (extracted from the main event listener)
+    function handleCardClick(questionCard) {
+      console.log('handleCardClick called for card:', questionCard.dataset.questionId);
+      const questionId = questionCard.dataset.questionId;
+      const questionText = questionCard.querySelector('.card-title').textContent;
+      const backgroundColor = questionCard.style.backgroundColor;
+        let answerHtml = '<p class="text-muted">No answers available</p>';
+      
+      // Get the answers for this specific question
+      const answers = questionCard.dataset.answers;
+      console.log('Answers data:', answers);
+      if (answers) {
+        try {
+          const answersArray = JSON.parse(answers);
+          console.log('Parsed answers:', answersArray);
+          if (answersArray && answersArray.length > 0) {
+            answerHtml = `
+                <ul class="list-unstyled">
+                ${answersArray.map(answer => `<li><strong>Answer:</strong> '${answer}'</li>`).join('')}
+              </ul>`;
+          }
+        } catch (e) {
+          console.error('Error parsing answers:', e);
+        }
+      }
+
         const flipCardHtml = `
           <div class="flip-card">
             <div class="flip-card-inner">
@@ -189,38 +557,115 @@
                 </div>
               </div>
               <div class="flip-card-back" style="background-color: ${backgroundColor}">
-                <div class="card-content">
-                  ${answerHtml}
-                </div>
+                <div class="card-content">${answerHtml}</div>
               </div>
             </div>
-          </div>
-        `;
+          </div>`;
         flippedCardContainer.innerHTML = flipCardHtml;
-        
         overlay.style.display = "block";
         flippedCardContainer.style.display = "flex";
         document.body.style.overflow = "hidden";
-        
+      
         const modalFlipCard = flippedCardContainer.querySelector('.flip-card');
         modalFlipCard.addEventListener("click", function(e) {
           e.stopPropagation();
           const inner = this.querySelector('.flip-card-inner');
-          if (inner.style.transform === 'rotateY(180deg)') {
-            inner.style.transform = 'rotateY(0deg)';
-          } else {
-            inner.style.transform = 'rotateY(180deg)';
-          }
+          inner.style.transform = inner.style.transform === 'rotateY(180deg)' ? 'rotateY(0deg)' : 'rotateY(180deg)';
         });
-
         overlay.addEventListener("click", closeFlippedCard);
-      });
-    });
-
-    function closeFlippedCard() {
-      overlay.style.display = "none";
-      flippedCardContainer.style.display = "none";
-      document.body.style.overflow = "auto";
     }
+    
+    // Function to show alerts
+    function showAlert(type, message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3 small shadow-sm`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      document.body.appendChild(alertDiv);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          alertDiv.remove();
+        }
+      }, 5000);
+    }
+    
+    // Function to reset the flashcard form
+    function resetFlashcardForm() {
+      const form = document.getElementById('flashcard-form');
+      form.reset();
+      
+      // Remove all flashcard sets except the first one
+      const flashcardSets = document.querySelectorAll('.flashcard-set');
+      flashcardSets.forEach((set, index) => {
+        if (index > 0) {
+          set.remove();
+        }
+      });
+      
+      // Update remove buttons
+      updateRemoveSetButtons();
+      
+      // Clear any error messages
+      const errorAlerts = form.querySelectorAll('.alert-danger');
+      errorAlerts.forEach(alert => alert.remove());
+    }
+
+    // Initialize remove buttons
+    updateRemoveSetButtons();
+    
+    // Global debugging function - available in console
+    window.testAllFlashcards = function() {
+      console.log('=== Testing All Flashcards ===');
+      const allCards = document.querySelectorAll('.question-card');
+      console.log('Total cards found:', allCards.length);
+      
+      allCards.forEach((card, index) => {
+        console.log(`Card ${index + 1}:`, {
+          id: card.dataset.questionId,
+          answers: card.dataset.answers,
+          element: card,
+          hasClickHandler: card.onclick !== null
+        });
+      });
+      
+      // Test clicking on each card
+      allCards.forEach((card, index) => {
+        console.log(`Testing click on card ${index + 1}...`);
+        try {
+          const clickEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+          });
+          card.dispatchEvent(clickEvent);
+          console.log(`Card ${index + 1} click dispatched successfully`);
+        } catch (error) {
+          console.error(`Error clicking card ${index + 1}:`, error);
+        }
+      });
+    };
+    
+    // Add a test button to manually test card functionality
+    window.addTestButton = function() {
+      const testButton = document.createElement('button');
+      testButton.textContent = 'Test All Cards';
+      testButton.className = 'btn btn-warning position-fixed';
+      testButton.style.top = '100px';
+      testButton.style.right = '20px';
+      testButton.style.zIndex = '9999';
+      testButton.onclick = function() {
+        testAllFlashcards();
+      };
+      document.body.appendChild(testButton);
+      console.log('Test button added - click it to test all cards');
+    };
+    
+    // Log that the debugging function is available
+    console.log('Flashcard debugging available: use testAllFlashcards() or addTestButton() in console');
   });
 </script>

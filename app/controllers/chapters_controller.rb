@@ -21,7 +21,7 @@ class ChaptersController < ApplicationController
 		if @chapter.save
 			redirect_to subject_chapters_path(@subject), notice: "Chapter created successfully!!"
 		else
-			redirect_to subject_chapters_path, status: :found, alert: @chapter.errors.full_messages.to_sentence
+			redirect_to subject_chapters_path, alert: @chapter.errors.full_messages.to_sentence
 		end
 	end
 
@@ -35,7 +35,7 @@ class ChaptersController < ApplicationController
 		if @chapter.update(chapter_params)
 			redirect_to subject_chapters_path(@subject), notice: "Chapter updated successfully!!"
 		else
-			redirect_to subject_chapters_path, status: :found
+			redirect_to subject_chapters_path, alert: @chapter.errors.full_messages.to_sentence
 		end
 	end
 
@@ -49,7 +49,7 @@ class ChaptersController < ApplicationController
 	def set_subject
 		@subject = current_user.subjects.find_by(id: params[:subject_id])
 		unless @subject
-			redirect_to subjects_path, notice: "Subject not found!!"
+			redirect_to subjects_path, alert: "Subject not found!!"
 			return false
 		end
 	end
@@ -64,7 +64,7 @@ class ChaptersController < ApplicationController
 	end
 
 	def chapter_params
-		params.require(:chapter).permit(:name)
+		params.require(:chapter).permit(:name, :description, :label)
 	end
 
 	def authenticate_user

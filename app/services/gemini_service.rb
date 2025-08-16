@@ -22,16 +22,58 @@ class GeminiService
         "
       }] }] }.to_json
     )
-    
     Rails.logger.info "Gemini API Response: #{response.body}"
 
-    str = response.dig('candidates', 0, 'content', 'parts', 0, 'text')
-    qa_pairs = str.split("\n\n")
-
+    # Parse the JSON response first
+    response_data = JSON.parse(response.body)
+    str = response_data.dig('candidates', 0, 'content', 'parts', 0, 'text')
+    
+    Rails.logger.info "Raw text from Gemini: #{str}"
+    
+    return [] unless str.present?
+    
+    # Split by double newlines first, then handle single newlines
+    qa_pairs = str.split(/\n\n+/)
+    Rails.logger.info "QA pairs after split: #{qa_pairs.inspect}"
+    
     questions_array = qa_pairs.map.with_index(1) do |pair, index|
-      question, answer = pair.split("\nAnswer: ")
-      question = question.sub(/,$/, '').sub(/^Q\d+: /, '')
+      Rails.logger.info "Processing pair #{index}: #{pair}"
+      
+      # Try different patterns to extract question and answer
+      question = nil
+      answer = nil
+      
+      # Pattern 1: Q1: question\nAnswer: answer
+      if pair.match(/^Q\d+:\s*(.+?)\nAnswer:\s*(.+)$/m)
+        question = $1.strip
+        answer = $2.strip
+      # Pattern 2: Q1: question, Answer: answer
+      elsif pair.match(/^Q\d+:\s*(.+?),\s*Answer:\s*(.+)$/)
+        question = $1.strip
+        answer = $2.strip
+      # Pattern 3: Just split by newline if Answer: is present
+      elsif pair.include?("Answer:")
+        parts = pair.split("Answer:")
+        question = parts[0].sub(/^Q\d+:\s*/, '').strip
+        answer = parts[1].strip
+      else
+        Rails.logger.warn "Could not parse pair #{index}: #{pair}"
+        next
+      end
+      
+      # Clean up the question and answer
+      question = question.sub(/,$/, '').sub(/^Q\d+:\s*/, '').strip
+      answer = answer.strip
+      
+      Rails.logger.info "Extracted - Question: '#{question}', Answer: '#{answer}'"
+      
+      # Skip if either is empty
+      next if question.blank? || answer.blank?
+      
       { id: index, question: question, answer: answer }.with_indifferent_access
-    end
+    end.compact
+    
+    Rails.logger.info "Final questions array: #{questions_array.inspect}"
+    questions_array
   end
 end
